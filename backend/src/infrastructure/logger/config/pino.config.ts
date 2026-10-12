@@ -1,5 +1,5 @@
-import { API_PREFIX, REQUEST_ID_HEADER } from '@infrastructure/constants/common/api.constants.js';
-import type { TConfigService } from '@infrastructure/types/common/env.types.js';
+import { API_PREFIX, REQUEST_ID_HEADER } from '@infrastructure/common/constants/api.constants.js';
+import type { TConfigService } from '@infrastructure/common/types/env.types.js';
 import type { Params } from 'nestjs-pino';
 import type { LevelWithSilent } from 'pino';
 import { randomUUID } from 'node:crypto';

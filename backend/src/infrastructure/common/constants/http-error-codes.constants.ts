@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 
 export const HTTP_STATUS_ERROR_CODES: ReadonlyMap<number, ErrorCode> = new Map([
   [HttpStatus.BAD_REQUEST, ErrorCode.BadRequest],

@@ -1,6 +1,6 @@
-import { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
-import { AppException } from '@infrastructure/helpers/common/app.exception.js';
-import { flattenValidationErrors } from '@infrastructure/helpers/common/validation-error.helper.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import { AppException } from '@infrastructure/common/helpers/app.exception.js';
+import { flattenValidationErrors } from '@infrastructure/common/helpers/validation-error.helper.js';
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import type { ValidationError } from 'class-validator';
 

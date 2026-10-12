@@ -1,4 +1,4 @@
-import { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { createIntegrationApp } from '@infrastructure/test/utils/create-integration-app.js';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';

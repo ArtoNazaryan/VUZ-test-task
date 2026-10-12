@@ -1,4 +1,4 @@
-import type { IValidationIssue } from '@infrastructure/interfaces/common/error-response.interfaces.js';
+import type { IValidationIssue } from '@infrastructure/common/interfaces/error-response.interfaces.js';
 import type { ValidationError } from 'class-validator';
 
 export function flattenValidationErrors(

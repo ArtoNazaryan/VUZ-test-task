@@ -1,4 +1,4 @@
-import { flattenValidationErrors } from '@infrastructure/helpers/common/validation-error.helper.js';
+import { flattenValidationErrors } from '@infrastructure/common/helpers/validation-error.helper.js';
 import type { ValidationError } from 'class-validator';
 import { describe, expect, it } from 'vitest';
 

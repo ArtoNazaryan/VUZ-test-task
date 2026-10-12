@@ -1,5 +1,5 @@
-import type { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
-import type { TErrorDetails } from '@infrastructure/types/common/error-details.types.js';
+import type { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import type { TErrorDetails } from '@infrastructure/common/types/error-details.types.js';
 
 export interface IValidationIssue {
   field: string;

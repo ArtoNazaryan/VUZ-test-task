@@ -1,4 +1,4 @@
-import { API_PREFIX } from '@infrastructure/constants/common/api.constants.js';
+import { API_PREFIX } from '@infrastructure/common/constants/api.constants.js';
 import { GlobalExceptionFilter } from '@infrastructure/globals/global-exception.filter.js';
 import { buildGlobalValidationPipe } from '@infrastructure/globals/global-validation.pipe.js';
 import type { INestApplication } from '@nestjs/common';

@@ -1,6 +1,6 @@
-import { LOG_LEVELS } from '@infrastructure/constants/logger/logger.constants.js';
-import { NodeEnv } from '@infrastructure/enums/common/node-env.enum.js';
-import type { TEnv } from '@infrastructure/types/common/env.types.js';
+import { LOG_LEVELS } from '@infrastructure/common/constants/logger.constants.js';
+import { NodeEnv } from '@infrastructure/common/enums/node-env.enum.js';
+import type { TEnv } from '@infrastructure/common/types/env.types.js';
 import { z } from 'zod';
 
 export const envSchema = z.object({

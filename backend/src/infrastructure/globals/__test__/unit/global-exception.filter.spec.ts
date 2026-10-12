@@ -1,6 +1,6 @@
-import { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { GlobalExceptionFilter } from '@infrastructure/globals/global-exception.filter.js';
-import { AppException } from '@infrastructure/helpers/common/app.exception.js';
+import { AppException } from '@infrastructure/common/helpers/app.exception.js';
 import {
   createHttpArgumentsHost,
   createResponseMock,

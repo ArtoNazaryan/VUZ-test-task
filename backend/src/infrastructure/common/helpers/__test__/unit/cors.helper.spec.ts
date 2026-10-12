@@ -1,4 +1,4 @@
-import { parseCorsOrigins } from '@infrastructure/helpers/common/cors.helper.js';
+import { parseCorsOrigins } from '@infrastructure/common/helpers/cors.helper.js';
 import { describe, expect, it } from 'vitest';
 
 describe('parseCorsOrigins', () => {

@@ -1,5 +1,5 @@
 import { validateEnv } from '@infrastructure/config/env.validation.js';
-import { NodeEnv } from '@infrastructure/enums/common/node-env.enum.js';
+import { NodeEnv } from '@infrastructure/common/enums/node-env.enum.js';
 import { describe, expect, it } from 'vitest';
 
 describe('validateEnv', () => {

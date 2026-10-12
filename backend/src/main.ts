@@ -1,8 +1,8 @@
-import { API_PREFIX, SWAGGER_PATH } from '@infrastructure/constants/common/api.constants.js';
+import { API_PREFIX, SWAGGER_PATH } from '@infrastructure/common/constants/api.constants.js';
 import { GlobalExceptionFilter } from '@infrastructure/globals/global-exception.filter.js';
 import { buildGlobalValidationPipe } from '@infrastructure/globals/global-validation.pipe.js';
-import { parseCorsOrigins } from '@infrastructure/helpers/common/cors.helper.js';
-import type { TConfigService } from '@infrastructure/types/common/env.types.js';
+import { parseCorsOrigins } from '@infrastructure/common/helpers/cors.helper.js';
+import type { TConfigService } from '@infrastructure/common/types/env.types.js';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

@@ -2,11 +2,11 @@ import {
   HTTP_STATUS_ERROR_CODES,
   INTERNAL_ERROR_MESSAGE,
   SERVER_ERROR_STATUS_THRESHOLD,
-} from '@infrastructure/constants/common/http-error-codes.constants.js';
-import { ErrorCode } from '@infrastructure/enums/common/error-code.enum.js';
-import { AppException } from '@infrastructure/helpers/common/app.exception.js';
-import { isHttpExceptionBody } from '@infrastructure/helpers/common/http-exception-body.helper.js';
-import type { IErrorResponse } from '@infrastructure/interfaces/common/error-response.interfaces.js';
+} from '@infrastructure/common/constants/http-error-codes.constants.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import { AppException } from '@infrastructure/common/helpers/app.exception.js';
+import { isHttpExceptionBody } from '@infrastructure/common/helpers/http-exception-body.helper.js';
+import type { IErrorResponse } from '@infrastructure/common/interfaces/error-response.interfaces.js';
 import {
   type ArgumentsHost,
   Catch,
