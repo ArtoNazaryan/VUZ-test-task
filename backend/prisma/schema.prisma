@@ -76,3 +76,13 @@ model CharacterAbility {
   @@id([characterId, abilityId])
   @@map("character_abilities")
 }
+
+model User {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
