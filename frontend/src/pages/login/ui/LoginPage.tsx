@@ -1,17 +1,22 @@
+import { LoginForm } from '@/features/login-form/index.ts';
 import { ROUTES } from '@/shared/config/index.ts';
-import { Container, Link, Stack, Typography } from '@mui/material';
+import { FormCard } from '@/shared/ui/index.ts';
+import { Link, Typography } from '@mui/material';
 import type { ReactElement } from 'react';
-import { Link as RouterLink } from 'react-router';
+import { Link as RouterLink, useLocation } from 'react-router';
 
 export function LoginPage(): ReactElement {
+  const redirectState: unknown = useLocation().state;
+
   return (
-    <Container maxWidth="xs" sx={{ py: 8 }}>
-      <Stack spacing={2}>
-        <Typography variant="h1">Log in</Typography>
-        <Link component={RouterLink} to={ROUTES.REGISTER}>
-          Create an account
+    <FormCard title="Log in" subtitle="Build your squad of champions">
+      <LoginForm />
+      <Typography variant="body2" sx={{ mt: 3, textAlign: 'center' }}>
+        No account yet?{' '}
+        <Link component={RouterLink} to={ROUTES.REGISTER} state={redirectState}>
+          Create one
         </Link>
-      </Stack>
-    </Container>
+      </Typography>
+    </FormCard>
   );
 }

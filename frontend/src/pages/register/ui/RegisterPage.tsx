@@ -1,17 +1,22 @@
+import { RegisterForm } from '@/features/register-form/index.ts';
 import { ROUTES } from '@/shared/config/index.ts';
-import { Container, Link, Stack, Typography } from '@mui/material';
+import { FormCard } from '@/shared/ui/index.ts';
+import { Link, Typography } from '@mui/material';
 import type { ReactElement } from 'react';
-import { Link as RouterLink } from 'react-router';
+import { Link as RouterLink, useLocation } from 'react-router';
 
 export function RegisterPage(): ReactElement {
+  const redirectState: unknown = useLocation().state;
+
   return (
-    <Container maxWidth="xs" sx={{ py: 8 }}>
-      <Stack spacing={2}>
-        <Typography variant="h1">Create an account</Typography>
-        <Link component={RouterLink} to={ROUTES.LOGIN}>
-          I already have an account
+    <FormCard title="Create an account" subtitle="Pick up to 6 champions for your squad">
+      <RegisterForm />
+      <Typography variant="body2" sx={{ mt: 3, textAlign: 'center' }}>
+        Already have an account?{' '}
+        <Link component={RouterLink} to={ROUTES.LOGIN} state={redirectState}>
+          Log in
         </Link>
-      </Stack>
-    </Container>
+      </Typography>
+    </FormCard>
   );
 }
