@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     root: './',
     include: ['src/**/__test__/integration/**/*.int-spec.ts'],
+    globalSetup: ['src/infrastructure/test/utils/vitest.global-setup.ts'],
     setupFiles: ['src/infrastructure/test/utils/vitest.setup.ts'],
     clearMocks: true,
     restoreMocks: true,

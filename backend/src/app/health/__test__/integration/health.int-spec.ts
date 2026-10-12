@@ -1,4 +1,5 @@
 import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import { PrismaService } from '@infrastructure/prisma/service/prisma.service.js';
 import { prismaServiceMock } from '@infrastructure/test/mocks/prisma/prisma.service.mock.js';
 import { redisServiceMock } from '@infrastructure/test/mocks/redis/redis.service.mock.js';
 import { createIntegrationApp } from '@infrastructure/test/utils/create-integration-app.js';
@@ -11,7 +12,9 @@ describe('GET /api/v1/health', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    app = await createIntegrationApp();
+    app = await createIntegrationApp((builder) =>
+      builder.overrideProvider(PrismaService).useValue(prismaServiceMock),
+    );
   });
 
   afterAll(async () => {
