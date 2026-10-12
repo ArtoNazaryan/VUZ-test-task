@@ -45,13 +45,20 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual(result);
   });
 
-  it('throws SERVICE_UNAVAILABLE with the check details when a dependency is down', async () => {
-    const details = { status: 'error', error: { redis: { status: 'down' } } };
-    healthCheckService.check.mockRejectedValue(new ServiceUnavailableException(details));
+  it('throws SERVICE_UNAVAILABLE with only the status of each dependency', async () => {
+    healthCheckService.check.mockRejectedValue(
+      new ServiceUnavailableException({
+        status: 'error',
+        details: {
+          database: { status: 'up', responseTime: 2 },
+          redis: { status: 'down', message: "Stream isn't writeable", responseTime: 0 },
+        },
+      }),
+    );
 
     await expect(service.check()).rejects.toMatchObject({
       code: ErrorCode.ServiceUnavailable,
-      details,
+      details: { database: { status: 'up' }, redis: { status: 'down' } },
     });
   });
 

@@ -39,10 +39,12 @@ describe('GET /api/v1/health', () => {
     const response = await request(app.getHttpServer()).get('/api/v1/health');
 
     expect(response.status).toBe(503);
-    expect(response.body).toMatchObject({
+    expect(response.body).toEqual({
       statusCode: 503,
       error: ErrorCode.ServiceUnavailable,
-      details: { error: { redis: { status: 'down' } } },
+      message: 'One or more dependencies are unavailable',
+      details: { database: { status: 'up' }, redis: { status: 'down' } },
+      requestId: expect.any(String),
     });
   });
 
@@ -53,7 +55,8 @@ describe('GET /api/v1/health', () => {
 
     expect(response.status).toBe(503);
     expect(response.body).toMatchObject({
-      details: { error: { database: { status: 'down' } } },
+      details: { database: { status: 'down' }, redis: { status: 'up' } },
     });
+    expect(JSON.stringify(response.body)).not.toContain('ECONNREFUSED');
   });
 });

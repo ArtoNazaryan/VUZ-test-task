@@ -1,7 +1,7 @@
+import { toPublicHealthDetails } from '@app/health/helpers/health-result.helper.js';
 import { HEALTH_CHECK_TIMEOUT_MS } from '@infrastructure/common/constants/health.constants.js';
 import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { AppException } from '@infrastructure/common/helpers/app.exception.js';
-import { isPlainObject } from '@infrastructure/common/helpers/object.helper.js';
 import { PrismaService } from '@infrastructure/prisma/service/prisma.service.js';
 import { RedisService } from '@infrastructure/redis/service/redis.service.js';
 import { HttpStatus, Injectable, ServiceUnavailableException } from '@nestjs/common';
@@ -29,13 +29,11 @@ export class HealthService {
       ]);
     } catch (error) {
       if (error instanceof ServiceUnavailableException) {
-        const result = error.getResponse();
-
         throw new AppException(
           ErrorCode.ServiceUnavailable,
           'One or more dependencies are unavailable',
           HttpStatus.SERVICE_UNAVAILABLE,
-          isPlainObject(result) ? result : undefined,
+          toPublicHealthDetails(error.getResponse()),
         );
       }
 
