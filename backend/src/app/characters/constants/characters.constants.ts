@@ -1,5 +1,9 @@
 import type { CharacterSelect } from '@infrastructure/prisma/generated/models.js';
 
+export const DEFAULT_CHARACTERS_PAGE_SIZE = 20;
+export const MAX_CHARACTERS_PAGE_SIZE = 50;
+export const MAX_SEARCH_LENGTH = 100;
+
 export const ABILITY_DISPLAY_ORDER: readonly string[] = [
   'Power',
   'Mobility',

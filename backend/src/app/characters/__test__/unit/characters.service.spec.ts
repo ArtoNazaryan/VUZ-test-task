@@ -1,3 +1,7 @@
+import type { ListCharactersQueryDto } from '@app/characters/dto/list-characters-query.dto.js';
+import { CharacterSort } from '@app/characters/enums/character-sort.enum.js';
+import { encodeCharacterCursor } from '@app/characters/helpers/cursor.helper.js';
+import type { ICharacterListFilters } from '@app/characters/interfaces/character-list.interfaces.js';
 import { CharactersRepository } from '@app/characters/repositories/characters.repository.js';
 import { CharactersService } from '@app/characters/services/characters.service.js';
 import type { TCharacterRow } from '@app/characters/types/character.types.js';
@@ -10,6 +14,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 describe('CharactersService', () => {
   let service: CharactersService;
   const repository = {
+    findPage: vi.fn<(filters: ICharacterListFilters, take: number) => Promise<TCharacterRow[]>>(),
     findById: vi.fn<(id: number) => Promise<TCharacterRow | null>>(),
     findUniverseNames: vi.fn<() => Promise<string[]>>(),
     findTagNames: vi.fn<() => Promise<string[]>>(),
@@ -22,6 +27,84 @@ describe('CharactersService', () => {
     }).compile();
 
     service = moduleRef.get(CharactersService);
+  });
+
+  describe('list', () => {
+    const query = (overrides: Partial<ListCharactersQueryDto> = {}): ListCharactersQueryDto => ({
+      limit: 2,
+      sort: CharacterSort.NameAsc,
+      ...overrides,
+    });
+
+    it('asks the repository for one row more than the page size', async () => {
+      repository.findPage.mockResolvedValue([]);
+
+      await service.list(query({ search: 'sub', tags: ['ninja'], universes: ['Mortal Kombat'] }));
+
+      expect(repository.findPage).toHaveBeenCalledWith(
+        {
+          search: 'sub',
+          tags: ['ninja'],
+          universes: ['Mortal Kombat'],
+          sort: CharacterSort.NameAsc,
+          after: undefined,
+        },
+        3,
+      );
+    });
+
+    it('returns a cursor pointing at the last item when more rows exist', async () => {
+      repository.findPage.mockResolvedValue([
+        makeCharacterRow({ id: 1, name: 'Akuma' }),
+        makeCharacterRow({ id: 2, name: 'Baraka' }),
+        makeCharacterRow({ id: 3, name: 'Cammy' }),
+      ]);
+
+      const page = await service.list(query());
+
+      expect(page.items.map((item) => item.name)).toEqual(['Akuma', 'Baraka']);
+      expect(page.nextCursor).toBe(
+        encodeCharacterCursor({ name: 'Baraka', id: 2, sort: CharacterSort.NameAsc }),
+      );
+    });
+
+    it('returns a null cursor on the last page', async () => {
+      repository.findPage.mockResolvedValue([makeCharacterRow({ id: 1, name: 'Akuma' })]);
+
+      await expect(service.list(query())).resolves.toMatchObject({ nextCursor: null });
+    });
+
+    it('passes a decoded cursor to the repository', async () => {
+      repository.findPage.mockResolvedValue([]);
+      const cursor = { name: 'Baraka', id: 2, sort: CharacterSort.NameAsc };
+
+      await service.list(query({ cursor: encodeCharacterCursor(cursor) }));
+
+      expect(repository.findPage).toHaveBeenCalledWith(
+        expect.objectContaining({ after: cursor }),
+        3,
+      );
+    });
+
+    it('rejects a malformed cursor with VALIDATION_ERROR', async () => {
+      await expect(service.list(query({ cursor: 'garbage' }))).rejects.toMatchObject({
+        code: ErrorCode.ValidationError,
+        status: HttpStatus.BAD_REQUEST,
+      });
+      expect(repository.findPage).not.toHaveBeenCalled();
+    });
+
+    it('rejects a cursor created for a different sort order', async () => {
+      const descendingCursor = encodeCharacterCursor({
+        name: 'Baraka',
+        id: 2,
+        sort: CharacterSort.NameDesc,
+      });
+
+      await expect(service.list(query({ cursor: descendingCursor }))).rejects.toMatchObject({
+        code: ErrorCode.ValidationError,
+      });
+    });
   });
 
   describe('getById', () => {
