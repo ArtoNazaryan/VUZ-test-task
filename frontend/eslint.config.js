@@ -27,8 +27,14 @@ export default defineConfig([
     rules: {
       'no-console': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-type': 'error',
-      '@typescript-eslint/explicit-module-boundary-types': 'error',
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        { allowedNames: ['createAppStore'] },
+      ],
+      '@typescript-eslint/explicit-module-boundary-types': [
+        'error',
+        { allowedNames: ['createAppStore'] },
+      ],
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
@@ -53,6 +59,10 @@ export default defineConfig([
   {
     files: ['**/__test__/**/*.{ts,tsx}', 'src/shared/lib/test/**/*.{ts,tsx}'],
     rules: {
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        { allowedNames: ['createAppStore', 'createTestStore'] },
+      ],
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
     },

@@ -19,7 +19,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"]

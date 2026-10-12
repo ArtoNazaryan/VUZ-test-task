@@ -1,48 +1,61 @@
-import { AppThemeProvider } from '@/app/providers/AppThemeProvider.tsx';
-import { APP_ROUTES } from '@/app/router/app-routes.tsx';
-import { render, screen } from '@testing-library/react';
+import { renderRoutes } from '@/app/__test__/helpers/render-routes.tsx';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryRouter, RouterProvider } from 'react-router';
 
-function renderAt(path: string): ReturnType<typeof createMemoryRouter> {
-  const router = createMemoryRouter(APP_ROUTES, { initialEntries: [path] });
-
-  render(
-    <AppThemeProvider>
-      <RouterProvider router={router} />
-    </AppThemeProvider>,
-  );
-
-  return router;
-}
+const HOME_HEADING = 'Select your squad to defend earthrealm';
 
 describe('app routes', () => {
-  it('shows the login page on /login', () => {
-    renderAt('/login');
+  describe('when the session is still being restored', () => {
+    it('shows a loading indicator instead of the protected page', () => {
+      renderRoutes('/', 'unknown');
 
-    expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('progressbar', { name: 'Restoring your session' }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: HOME_HEADING })).not.toBeInTheDocument();
+    });
   });
 
-  it('shows the register page on /register', () => {
-    renderAt('/register');
+  describe('when nobody is logged in', () => {
+    it('redirects the home page to the login page', () => {
+      const router = renderRoutes('/', 'anonymous');
 
-    expect(screen.getByRole('heading', { name: 'Create an account' })).toBeInTheDocument();
+      expect(router.state.location.pathname).toBe('/login');
+      expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument();
+    });
+
+    it('shows the register page', () => {
+      renderRoutes('/register', 'anonymous');
+
+      expect(screen.getByRole('heading', { name: 'Create an account' })).toBeInTheDocument();
+    });
+
+    it('navigates from login to register through the link', async () => {
+      renderRoutes('/login', 'anonymous');
+
+      await userEvent.click(screen.getByRole('link', { name: 'Create an account' }));
+
+      expect(screen.getByRole('heading', { name: 'Create an account' })).toBeInTheDocument();
+    });
   });
 
-  it('navigates from login to register through the link', async () => {
-    renderAt('/login');
+  describe('when the user is logged in', () => {
+    it('shows the squad builder', () => {
+      renderRoutes('/', 'authenticated');
 
-    await userEvent.click(screen.getByRole('link', { name: 'Create an account' }));
+      expect(screen.getByRole('heading', { name: HOME_HEADING })).toBeInTheDocument();
+    });
 
-    expect(screen.getByRole('heading', { name: 'Create an account' })).toBeInTheDocument();
-  });
+    it('sends the login page back to the home page', () => {
+      const router = renderRoutes('/login', 'authenticated');
 
-  it('redirects an unknown path to the home page', () => {
-    const router = renderAt('/no-such-page');
+      expect(router.state.location.pathname).toBe('/');
+    });
 
-    expect(router.state.location.pathname).toBe('/');
-    expect(
-      screen.getByRole('heading', { name: 'Select your squad to defend earthrealm' }),
-    ).toBeInTheDocument();
+    it('redirects an unknown path to the home page', () => {
+      const router = renderRoutes('/no-such-page', 'authenticated');
+
+      expect(router.state.location.pathname).toBe('/');
+    });
   });
 });
