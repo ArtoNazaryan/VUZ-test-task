@@ -12,8 +12,12 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts \
+  && node node_modules/@prisma/engines/scripts/postinstall.js \
+  && npm cache clean --force
+COPY prisma.config.ts docker-entrypoint.sh ./
+COPY prisma ./prisma
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["./docker-entrypoint.sh"]

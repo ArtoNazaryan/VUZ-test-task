@@ -41,6 +41,9 @@ services:
       DATABASE_URL: postgresql://squad:squad@postgres:5432/squad_of_champions?schema=public
       REDIS_URL: redis://redis:6379
       LOG_PRETTY: 'false'
+      CHARACTERS_JSON_PATH: /app/data/characters.json
+    volumes:
+      - ./frontend/src/data/characters.json:/app/data/characters.json:ro
     ports:
       - '3000:3000'
     depends_on:
@@ -53,7 +56,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     restart: unless-stopped
 
 volumes:
