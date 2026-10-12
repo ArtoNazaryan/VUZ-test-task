@@ -4,16 +4,39 @@ import {
   type ICharacter,
   TagBadge,
 } from '@/entities/character/index.ts';
-import { Stack, TableCell, TableRow, Typography } from '@mui/material';
+import { SquadMemberCheckbox } from '@/features/toggle-squad-member/index.ts';
+import { alpha, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import { memo, type ReactElement } from 'react';
 
 interface ICharacterRowProps {
   character: ICharacter;
+  isMember: boolean;
+  isSquadFull: boolean;
+  onToggle: (character: ICharacter, isMember: boolean) => void;
 }
 
-function CharacterRowComponent({ character }: ICharacterRowProps): ReactElement {
+function CharacterRowComponent({
+  character,
+  isMember,
+  isSquadFull,
+  onToggle,
+}: ICharacterRowProps): ReactElement {
   return (
-    <TableRow hover>
+    <TableRow
+      hover
+      aria-selected={isMember}
+      sx={{ bgcolor: (theme) => (isMember ? alpha(theme.palette.primary.main, 0.08) : undefined) }}
+    >
+      <TableCell padding="checkbox">
+        <SquadMemberCheckbox
+          characterName={character.name}
+          isMember={isMember}
+          isSquadFull={isSquadFull}
+          onToggle={() => {
+            onToggle(character, isMember);
+          }}
+        />
+      </TableCell>
       <TableCell>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
           <CharacterAvatar character={character} />

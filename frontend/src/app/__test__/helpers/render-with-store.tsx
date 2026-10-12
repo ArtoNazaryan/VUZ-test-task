@@ -7,10 +7,15 @@ import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 
-export function renderWithStore(ui: ReactElement, isAuthenticated = false): TAppStore {
+export function renderWithStore(
+  ui: ReactElement,
+  isAuthenticated = false,
+  prepare?: (store: TAppStore) => void,
+): TAppStore {
   const store = createAppStore();
 
   store.dispatch(isAuthenticated ? sessionStarted(makeAuthSession()) : sessionEnded());
+  prepare?.(store);
   render(
     <Provider store={store}>
       <AppThemeProvider>{ui}</AppThemeProvider>

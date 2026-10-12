@@ -37,6 +37,15 @@ export interface IRenameSquadRequest {
   name: string;
 }
 
+export interface ISquadMemberRequest {
+  squadId: string;
+  characterId: number;
+}
+
+export interface IAddSquadMemberRequest extends ISquadMemberRequest {
+  character: ICharacter;
+}
+
 export interface IActiveSquadState {
   squadId: string | null;
 }

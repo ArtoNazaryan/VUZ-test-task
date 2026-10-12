@@ -7,7 +7,7 @@ export const selectCharacterFilters = (state: ICharacterFiltersRootState): IChar
   state.characterFilters;
 
 export const selectHasActiveFilters = (state: ICharacterFiltersRootState): boolean => {
-  const { search, tags, universes } = state.characterFilters;
+  const { search, tags, universes, myTeamOnly } = state.characterFilters;
 
-  return search.trim().length > 0 || tags.length > 0 || universes.length > 0;
+  return search.trim().length > 0 || tags.length > 0 || universes.length > 0 || myTeamOnly;
 };

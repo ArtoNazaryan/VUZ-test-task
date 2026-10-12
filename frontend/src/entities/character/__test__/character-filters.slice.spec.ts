@@ -1,6 +1,7 @@
 import {
   characterFiltersSlice,
   filtersCleared,
+  myTeamToggled,
   searchChanged,
   selectHasActiveFilters,
   tagToggled,
@@ -12,7 +13,7 @@ const initial = reducer(undefined, { type: 'init' });
 
 describe('characterFiltersSlice', () => {
   it('starts with no search and no filters', () => {
-    expect(initial).toEqual({ search: '', tags: [], universes: [] });
+    expect(initial).toEqual({ search: '', tags: [], universes: [], myTeamOnly: false });
   });
 
   it('adds a tag on the first toggle and removes it on the second', () => {
@@ -32,6 +33,16 @@ describe('characterFiltersSlice', () => {
     const busy = reducer(reducer(initial, searchChanged('sub')), tagToggled('ninja'));
 
     expect(reducer(busy, filtersCleared())).toEqual(initial);
+  });
+});
+
+describe('myTeamToggled', () => {
+  it('switches the My Team filter on and off and counts as an active filter', () => {
+    const on = reducer(initial, myTeamToggled());
+
+    expect(on.myTeamOnly).toBe(true);
+    expect(selectHasActiveFilters({ characterFilters: on })).toBe(true);
+    expect(reducer(on, myTeamToggled()).myTeamOnly).toBe(false);
   });
 });
 

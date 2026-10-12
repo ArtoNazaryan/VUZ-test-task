@@ -1,5 +1,6 @@
 import {
   selectCharacterFilters,
+  myTeamToggled,
   selectHasActiveFilters,
   tagToggled,
   universeToggled,
@@ -16,7 +17,7 @@ const SKELETON_PILLS = 12;
 
 export function CharacterFilters(): ReactElement {
   const dispatch = useDispatch();
-  const { tags, universes } = useSelector(selectCharacterFilters);
+  const { tags, universes, myTeamOnly } = useSelector(selectCharacterFilters);
   const hasActiveFilters = useSelector(selectHasActiveFilters);
   const { data: options, isLoading, isError } = useGetCharacterFiltersQuery(undefined);
 
@@ -48,6 +49,13 @@ export function CharacterFilters(): ReactElement {
                 onToggle={() => dispatch(tagToggled(tag))}
               />
             ))}
+        {!isLoading && (
+          <FilterPill
+            label="My Team"
+            isSelected={myTeamOnly}
+            onToggle={() => dispatch(myTeamToggled())}
+          />
+        )}
       </Stack>
       <Stack
         direction="row"

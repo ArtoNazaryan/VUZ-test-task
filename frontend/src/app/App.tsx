@@ -2,6 +2,7 @@ import { AppThemeProvider } from '@/app/providers/AppThemeProvider.tsx';
 import { SessionBootstrap } from '@/app/providers/SessionBootstrap.tsx';
 import { router } from '@/app/router/router.ts';
 import { appStore } from '@/app/store/store.ts';
+import { NotificationsHost } from '@/shared/ui/index.ts';
 import type { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router';
@@ -12,6 +13,7 @@ export function App(): ReactElement {
       <AppThemeProvider>
         <SessionBootstrap>
           <RouterProvider router={router} />
+          <NotificationsHost />
         </SessionBootstrap>
       </AppThemeProvider>
     </Provider>

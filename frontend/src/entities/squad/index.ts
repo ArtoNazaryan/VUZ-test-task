@@ -1,11 +1,14 @@
 export {
   squadApi,
+  useAddSquadMemberMutation,
   useCreateSquadMutation,
   useDeleteSquadMutation,
   useGetSquadQuery,
   useGetSquadsQuery,
+  useRemoveSquadMemberMutation,
   useRenameSquadMutation,
 } from './api/squad.api.ts';
+export { formatAverage } from './lib/squad-stats.helper.ts';
 export { buildActiveSquadStorageKey, resolveActiveSquadId } from './lib/active-squad.helper.ts';
 export {
   activeSquadChanged,
@@ -19,10 +22,14 @@ export {
 } from './model/squad.constants.ts';
 export type {
   IActiveSquadRootState,
+  IAddSquadMemberRequest,
   ICreateSquadRequest,
   IRenameSquadRequest,
   ISquad,
   ISquadAbilityAverage,
+  ISquadMemberRequest,
   ISquadStats,
   ISquadSummary,
 } from './model/squad.interfaces.ts';
+export { SquadMemberAvatar } from './ui/SquadMemberAvatar/SquadMemberAvatar.tsx';
+export { SquadStats } from './ui/SquadStats/SquadStats.tsx';

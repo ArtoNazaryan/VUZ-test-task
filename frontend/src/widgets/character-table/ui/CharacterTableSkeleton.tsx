@@ -14,6 +14,9 @@ export function CharacterTableSkeleton({
     <>
       {Array.from({ length: rows }, (_, rowIndex) => (
         <TableRow key={rowIndex} data-testid="character-skeleton-row">
+          <TableCell padding="checkbox">
+            <Skeleton variant="rounded" width={20} height={20} sx={{ mx: 'auto' }} />
+          </TableCell>
           <TableCell>
             <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
               <Skeleton variant="circular" width={40} height={40} />

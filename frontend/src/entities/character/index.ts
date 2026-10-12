@@ -14,10 +14,12 @@ export {
 export {
   characterFiltersSlice,
   filtersCleared,
+  myTeamToggled,
   searchChanged,
   tagToggled,
   universeToggled,
 } from './model/character-filters.slice.ts';
+export { filterCharactersLocally } from './lib/character-local-filter.helper.ts';
 export { MAX_ABILITY_SCORE } from './model/character.constants.ts';
 export type {
   ICharacter,

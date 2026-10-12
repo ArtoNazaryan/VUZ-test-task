@@ -52,7 +52,7 @@ const rowNames = (): string[] =>
   within(screen.getByRole('table', { name: 'Characters' }))
     .getAllByRole('row')
     .slice(1)
-    .map((row) => within(row).getAllByRole('cell')[0]?.textContent ?? '');
+    .map((row) => within(row).getAllByRole('cell')[1]?.textContent ?? '');
 
 describe('CharacterTable', () => {
   it('shows placeholder rows while the first page loads, then the characters', async () => {
@@ -74,7 +74,12 @@ describe('CharacterTable', () => {
 
     const headers = screen.getAllByRole('columnheader').map((header) => header.textContent);
 
-    expect(headers).toEqual(['Character', 'Tags', ...CHARACTER_FILTER_OPTIONS.abilities]);
+    expect(headers).toEqual([
+      'In squad',
+      'Character',
+      'Tags',
+      ...CHARACTER_FILTER_OPTIONS.abilities,
+    ]);
     expect(screen.getByText('10')).toHaveAttribute('data-max', 'true');
   });
 

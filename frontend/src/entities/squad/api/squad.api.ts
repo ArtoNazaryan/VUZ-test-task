@@ -1,8 +1,10 @@
 import { upsertSquadSummary } from '@/entities/squad/lib/squad-summary.helper.ts';
 import type {
+  IAddSquadMemberRequest,
   ICreateSquadRequest,
   IRenameSquadRequest,
   ISquad,
+  ISquadMemberRequest,
   ISquadSummary,
 } from '@/entities/squad/model/squad.interfaces.ts';
 import { baseApi } from '@/shared/api/index.ts';
@@ -53,6 +55,60 @@ export const squadApi = baseApi.injectEndpoints({
         }
       },
     }),
+    addSquadMember: build.mutation<ISquad, IAddSquadMemberRequest>({
+      query: ({ squadId, characterId }) => ({
+        url: `/squads/${squadId}/characters/${String(characterId)}`,
+        method: 'POST',
+      }),
+      onQueryStarted: async ({ squadId, character }, { dispatch, queryFulfilled }) => {
+        const optimisticPatch = dispatch(
+          squadApi.util.updateQueryData('getSquad', squadId, (squad) => {
+            if (!squad.characters.some((member) => member.id === character.id)) {
+              squad.characters.push(character);
+            }
+          }),
+        );
+
+        try {
+          const { data } = await queryFulfilled;
+
+          dispatch(
+            squadApi.util.updateQueryData('getSquads', undefined, (squads) =>
+              upsertSquadSummary(squads, data),
+            ),
+          );
+          await dispatch(squadApi.util.upsertQueryData('getSquad', squadId, data));
+        } catch {
+          optimisticPatch.undo();
+        }
+      },
+    }),
+    removeSquadMember: build.mutation<ISquad, ISquadMemberRequest>({
+      query: ({ squadId, characterId }) => ({
+        url: `/squads/${squadId}/characters/${String(characterId)}`,
+        method: 'DELETE',
+      }),
+      onQueryStarted: async ({ squadId, characterId }, { dispatch, queryFulfilled }) => {
+        const optimisticPatch = dispatch(
+          squadApi.util.updateQueryData('getSquad', squadId, (squad) => {
+            squad.characters = squad.characters.filter((character) => character.id !== characterId);
+          }),
+        );
+
+        try {
+          const { data } = await queryFulfilled;
+
+          dispatch(
+            squadApi.util.updateQueryData('getSquads', undefined, (squads) =>
+              upsertSquadSummary(squads, data),
+            ),
+          );
+          await dispatch(squadApi.util.upsertQueryData('getSquad', squadId, data));
+        } catch {
+          optimisticPatch.undo();
+        }
+      },
+    }),
     deleteSquad: build.mutation<undefined, string>({
       query: (id) => ({ url: `/squads/${id}`, method: 'DELETE' }),
       invalidatesTags: (_result, _error, id) => ['Squads', { type: 'Squad', id }],
@@ -78,5 +134,7 @@ export const {
   useGetSquadQuery,
   useCreateSquadMutation,
   useRenameSquadMutation,
+  useAddSquadMemberMutation,
   useDeleteSquadMutation,
+  useRemoveSquadMemberMutation,
 } = squadApi;

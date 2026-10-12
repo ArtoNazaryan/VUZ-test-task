@@ -48,6 +48,11 @@ describe('CharacterFilters', () => {
 
     await userEvent.click(clearAll);
 
-    expect(store.getState().characterFilters).toEqual({ search: '', tags: [], universes: [] });
+    expect(store.getState().characterFilters).toEqual({
+      search: '',
+      tags: [],
+      universes: [],
+      myTeamOnly: false,
+    });
   });
 });
