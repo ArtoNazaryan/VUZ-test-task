@@ -10,3 +10,68 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Universe {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  characters Character[]
+
+  @@map("universes")
+}
+
+model Character {
+  id         Int                @id
+  name       String
+  quote      String?
+  image      String
+  thumbnail  String?
+  universeId Int                @map("universe_id")
+  universe   Universe           @relation(fields: [universeId], references: [id])
+  tags       CharacterTag[]
+  abilities  CharacterAbility[]
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
+
+  @@index([name, id])
+  @@index([universeId])
+  @@map("characters")
+}
+
+model Tag {
+  id         Int            @id @default(autoincrement())
+  name       String         @unique
+  characters CharacterTag[]
+
+  @@map("tags")
+}
+
+model CharacterTag {
+  characterId Int       @map("character_id")
+  tagId       Int       @map("tag_id")
+  slot        Int       @db.SmallInt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id])
+
+  @@id([characterId, tagId])
+  @@index([tagId])
+  @@map("character_tags")
+}
+
+model Ability {
+  id         Int                @id @default(autoincrement())
+  name       String             @unique
+  characters CharacterAbility[]
+
+  @@map("abilities")
+}
+
+model CharacterAbility {
+  characterId Int       @map("character_id")
+  abilityId   Int       @map("ability_id")
+  score       Int       @db.SmallInt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  ability     Ability   @relation(fields: [abilityId], references: [id])
+
+  @@id([characterId, abilityId])
+  @@map("character_abilities")
+}
