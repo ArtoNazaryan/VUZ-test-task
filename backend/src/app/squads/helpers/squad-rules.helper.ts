@@ -43,3 +43,22 @@ export function findSquadRuleViolation(
 
   return null;
 }
+
+export function findAddMemberViolation(
+  memberIds: number[],
+  characterId: number,
+): TSquadRuleViolation | null {
+  if (memberIds.includes(characterId)) {
+    return { type: SquadRuleViolation.DuplicateCharacters, characterIds: [characterId] };
+  }
+
+  if (memberIds.length >= MAX_SQUAD_SIZE) {
+    return {
+      type: SquadRuleViolation.SquadFull,
+      limit: MAX_SQUAD_SIZE,
+      requested: memberIds.length + 1,
+    };
+  }
+
+  return null;
+}

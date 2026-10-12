@@ -7,10 +7,12 @@ import type { SquadSummaryResponseDto } from '@app/squads/dto/squad-summary-resp
 import { UpdateSquadDto } from '@app/squads/dto/update-squad.dto.js';
 import { SquadsService } from '@app/squads/services/squads.service.js';
 import {
+  ApiAddSquadMember,
   ApiCreateSquad,
   ApiDeleteSquad,
   ApiGetSquad,
   ApiListSquads,
+  ApiRemoveSquadMember,
   ApiUpdateSquad,
 } from '@app/squads/swagger/squads.swagger.js';
 import {
@@ -21,6 +23,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -72,5 +75,26 @@ export class SquadsController {
   @ApiDeleteSquad()
   remove(@CurrentUser() user: IAuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.squadsService.remove(id, user.id);
+  }
+
+  @Post(':id/characters/:characterId')
+  @HttpCode(HttpStatus.OK)
+  @ApiAddSquadMember()
+  addMember(
+    @CurrentUser() user: IAuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('characterId', ParseIntPipe) characterId: number,
+  ): Promise<SquadResponseDto> {
+    return this.squadsService.addMember(id, user.id, characterId);
+  }
+
+  @Delete(':id/characters/:characterId')
+  @ApiRemoveSquadMember()
+  removeMember(
+    @CurrentUser() user: IAuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('characterId', ParseIntPipe) characterId: number,
+  ): Promise<SquadResponseDto> {
+    return this.squadsService.removeMember(id, user.id, characterId);
   }
 }

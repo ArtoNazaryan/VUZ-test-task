@@ -1,6 +1,7 @@
 import { SquadRuleViolation } from '@app/squads/enums/squad-rule-violation.enum.js';
 import {
   squadNotFoundError,
+  toMemberConflictError,
   toSquadNameConflictError,
   toSquadRuleError,
 } from '@app/squads/helpers/squad-errors.helper.js';
@@ -64,5 +65,25 @@ describe('toSquadRuleError', () => {
       status: 422,
       details: { characterIds: [9999] },
     });
+  });
+});
+
+describe('toMemberConflictError', () => {
+  it('turns a unique violation into CHARACTER_ALREADY_IN_SQUAD for that character', () => {
+    const uniqueViolation = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+      code: 'P2002',
+      clientVersion: '7.10.0',
+    });
+
+    expect(toMemberConflictError(uniqueViolation, 25)).toMatchObject({
+      code: ErrorCode.CharacterAlreadyInSquad,
+      details: { characterIds: [25] },
+    });
+  });
+
+  it('returns any other error unchanged', () => {
+    const other = new Error('connection lost');
+
+    expect(toMemberConflictError(other, 25)).toBe(other);
   });
 });

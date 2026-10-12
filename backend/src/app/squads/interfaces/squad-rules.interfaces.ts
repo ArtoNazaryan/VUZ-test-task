@@ -1,3 +1,4 @@
+import type { TSquadRuleViolation } from '@app/squads/types/squad-rules.types.js';
 import type { SquadRuleViolation } from '@app/squads/enums/squad-rule-violation.enum.js';
 
 export interface ISquadSizeViolation {
@@ -24,4 +25,14 @@ export interface IAbilityAverage {
 export interface ISquadStats {
   memberCount: number;
   abilities: IAbilityAverage[];
+}
+
+export interface IAddMemberResult {
+  squadFound: boolean;
+  violation: TSquadRuleViolation | null;
+}
+
+export interface IRemoveMemberResult {
+  squadFound: boolean;
+  removed: boolean;
 }

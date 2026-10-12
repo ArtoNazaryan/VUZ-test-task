@@ -1,5 +1,6 @@
 import { SquadRuleViolation } from '@app/squads/enums/squad-rule-violation.enum.js';
 import {
+  findAddMemberViolation,
   findDuplicateIds,
   findSquadRuleViolation,
 } from '@app/squads/helpers/squad-rules.helper.js';
@@ -51,6 +52,33 @@ describe('findSquadRuleViolation', () => {
   it('reports the size limit before duplicates or unknown ids', () => {
     expect(findSquadRuleViolation([1, 1, 1, 1, 1, 1, 9999], allExist)).toMatchObject({
       type: SquadRuleViolation.SquadFull,
+    });
+  });
+});
+
+describe('findAddMemberViolation', () => {
+  it('allows adding to a squad with fewer than 6 members', () => {
+    expect(findAddMemberViolation([1, 2, 3, 4, 5], 6)).toBeNull();
+  });
+
+  it('rejects adding a seventh member', () => {
+    expect(findAddMemberViolation([1, 2, 3, 4, 5, 6], 7)).toEqual({
+      type: SquadRuleViolation.SquadFull,
+      limit: 6,
+      requested: 7,
+    });
+  });
+
+  it('rejects a character that is already a member', () => {
+    expect(findAddMemberViolation([1, 2], 2)).toEqual({
+      type: SquadRuleViolation.DuplicateCharacters,
+      characterIds: [2],
+    });
+  });
+
+  it('reports an existing member as a duplicate even when the squad is full', () => {
+    expect(findAddMemberViolation([1, 2, 3, 4, 5, 6], 3)).toMatchObject({
+      type: SquadRuleViolation.DuplicateCharacters,
     });
   });
 });

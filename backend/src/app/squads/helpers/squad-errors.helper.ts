@@ -47,3 +47,12 @@ export function toSquadRuleError(violation: TSquadRuleViolation): AppException {
       );
   }
 }
+
+export function toMemberConflictError(error: unknown, characterId: number): unknown {
+  return isUniqueViolation(error)
+    ? toSquadRuleError({
+        type: SquadRuleViolation.DuplicateCharacters,
+        characterIds: [characterId],
+      })
+    : error;
+}

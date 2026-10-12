@@ -10,6 +10,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 const squadIdParam = ApiParam({ name: 'id', format: 'uuid' });
@@ -60,6 +61,35 @@ export function ApiDeleteSquad(): MethodDecorator {
     ApiOperation({ summary: 'Delete one of your squads' }),
     squadIdParam,
     ApiNoContentResponse({ description: 'Deleted' }),
+    notFound,
+  );
+}
+
+const characterIdParam = ApiParam({ name: 'characterId', type: Number, example: 25 });
+
+export function ApiAddSquadMember(): MethodDecorator {
+  return applyDecorators(
+    ApiOperation({ summary: 'Add a character to one of your squads' }),
+    squadIdParam,
+    characterIdParam,
+    ApiOkResponse({ type: SquadResponseDto, description: 'The updated squad with new stats' }),
+    ApiConflictResponse({ description: 'CHARACTER_ALREADY_IN_SQUAD' }),
+    ApiUnprocessableEntityResponse({
+      description: 'SQUAD_FULL (already 6 characters) or CHARACTER_NOT_FOUND',
+    }),
+    notFound,
+  );
+}
+
+export function ApiRemoveSquadMember(): MethodDecorator {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Remove a character from one of your squads',
+      description: 'Idempotent: removing a character that is not in the squad is not an error.',
+    }),
+    squadIdParam,
+    characterIdParam,
+    ApiOkResponse({ type: SquadResponseDto, description: 'The updated squad with new stats' }),
     notFound,
   );
 }

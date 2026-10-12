@@ -1,12 +1,19 @@
 import type { CharacterFiltersResponseDto } from '@app/characters/dto/character-filters-response.dto.js';
 import type { CharacterResponseDto } from '@app/characters/dto/character-response.dto.js';
 import { CharactersService } from '@app/characters/services/characters.service.js';
-import type { ISquadMemberChanges } from '@app/squads/interfaces/squad-rules.interfaces.js';
+import { SquadEvent } from '@app/squads/enums/squad-event.enum.js';
+import { SquadRuleViolation } from '@app/squads/enums/squad-rule-violation.enum.js';
+import type {
+  IAddMemberResult,
+  IRemoveMemberResult,
+  ISquadMemberChanges,
+} from '@app/squads/interfaces/squad-rules.interfaces.js';
 import { SquadsRepository } from '@app/squads/repositories/squads.repository.js';
 import { SquadsService } from '@app/squads/services/squads.service.js';
 import type { TSquadDetailRow, TSquadSummaryRow } from '@app/squads/types/squad.types.js';
 import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { Prisma } from '@infrastructure/prisma/generated/client.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -36,7 +43,12 @@ describe('SquadsService', () => {
     updateOwned:
       vi.fn<(id: string, userId: string, changes: ISquadMemberChanges) => Promise<boolean>>(),
     deleteOwned: vi.fn<(id: string, userId: string) => Promise<boolean>>(),
+    addMemberOwned:
+      vi.fn<(id: string, userId: string, characterId: number) => Promise<IAddMemberResult>>(),
+    removeMemberOwned:
+      vi.fn<(id: string, userId: string, characterId: number) => Promise<IRemoveMemberResult>>(),
   } satisfies Partial<SquadsRepository>;
+  const eventEmitter = { emit: vi.fn<(event: string, payload: unknown) => boolean>() };
   const charactersService = {
     getManyByIds: vi.fn<(ids: number[]) => Promise<CharacterResponseDto[]>>(),
     getFilters: vi.fn<() => Promise<CharacterFiltersResponseDto>>(),
@@ -53,6 +65,7 @@ describe('SquadsService', () => {
         SquadsService,
         { provide: SquadsRepository, useValue: repository },
         { provide: CharactersService, useValue: charactersService },
+        { provide: EventEmitter2, useValue: eventEmitter },
       ],
     }).compile();
 
@@ -197,10 +210,108 @@ describe('SquadsService', () => {
   });
 
   describe('remove', () => {
+    it('emits squad.deleted after deleting', async () => {
+      repository.deleteOwned.mockResolvedValue(true);
+
+      await service.remove('squad-1', 'user-1');
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        SquadEvent.Deleted,
+        expect.objectContaining({ squadId: 'squad-1', userId: 'user-1' }),
+      );
+    });
+
     it('throws NOT_FOUND when the squad does not belong to the user', async () => {
       repository.deleteOwned.mockResolvedValue(false);
 
       await expect(service.remove('squad-1', 'someone-else')).rejects.toMatchObject(notFound);
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addMember', () => {
+    it('adds the character, emits squad.member-added and returns the squad', async () => {
+      repository.addMemberOwned.mockResolvedValue({ squadFound: true, violation: null });
+      repository.findOwned.mockResolvedValue(squadRow({ members: [{ characterId: 25 }] }));
+
+      await expect(service.addMember('squad-1', 'user-1', 25)).resolves.toMatchObject({
+        id: 'squad-1',
+      });
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        SquadEvent.MemberAdded,
+        expect.objectContaining({ squadId: 'squad-1', userId: 'user-1', characterId: 25 }),
+      );
+    });
+
+    it('rejects an unknown character before touching the squad', async () => {
+      charactersService.findExistingIds.mockResolvedValue(new Set());
+
+      await expect(service.addMember('squad-1', 'user-1', 9999)).rejects.toMatchObject({
+        code: ErrorCode.CharacterNotFound,
+      });
+      expect(repository.addMemberOwned).not.toHaveBeenCalled();
+    });
+
+    it('throws NOT_FOUND when the squad does not belong to the user', async () => {
+      repository.addMemberOwned.mockResolvedValue({ squadFound: false, violation: null });
+
+      await expect(service.addMember('squad-1', 'someone-else', 25)).rejects.toMatchObject(
+        notFound,
+      );
+    });
+
+    it('throws SQUAD_FULL when the squad already has 6 members', async () => {
+      repository.addMemberOwned.mockResolvedValue({
+        squadFound: true,
+        violation: { type: SquadRuleViolation.SquadFull, limit: 6, requested: 7 },
+      });
+
+      await expect(service.addMember('squad-1', 'user-1', 25)).rejects.toMatchObject({
+        code: ErrorCode.SquadFull,
+        status: 422,
+      });
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('throws CHARACTER_ALREADY_IN_SQUAD when the database rejects a duplicate', async () => {
+      repository.addMemberOwned.mockRejectedValue(uniqueViolation());
+
+      await expect(service.addMember('squad-1', 'user-1', 25)).rejects.toMatchObject({
+        code: ErrorCode.CharacterAlreadyInSquad,
+        status: 409,
+      });
+    });
+  });
+
+  describe('removeMember', () => {
+    it('emits squad.member-removed when the character was removed', async () => {
+      repository.removeMemberOwned.mockResolvedValue({ squadFound: true, removed: true });
+      repository.findOwned.mockResolvedValue(squadRow());
+
+      await service.removeMember('squad-1', 'user-1', 25);
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        SquadEvent.MemberRemoved,
+        expect.objectContaining({ characterId: 25 }),
+      );
+    });
+
+    it('returns the squad without an event when the character was not a member', async () => {
+      repository.removeMemberOwned.mockResolvedValue({ squadFound: true, removed: false });
+      repository.findOwned.mockResolvedValue(squadRow());
+
+      await expect(service.removeMember('squad-1', 'user-1', 25)).resolves.toMatchObject({
+        id: 'squad-1',
+      });
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('throws NOT_FOUND when the squad does not belong to the user', async () => {
+      repository.removeMemberOwned.mockResolvedValue({ squadFound: false, removed: false });
+
+      await expect(service.removeMember('squad-1', 'someone-else', 25)).rejects.toMatchObject(
+        notFound,
+      );
     });
   });
 });

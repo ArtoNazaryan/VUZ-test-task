@@ -10,11 +10,13 @@ import { PrismaModule } from '@infrastructure/prisma/prisma.module.js';
 import { RedisModule } from '@infrastructure/redis/redis.module.js';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnv }),
     LoggerModule,
+    EventEmitterModule.forRoot(),
     PrismaModule,
     RedisModule,
     CacheModule,

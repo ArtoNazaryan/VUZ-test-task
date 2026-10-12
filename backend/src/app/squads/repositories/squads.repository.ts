@@ -2,7 +2,12 @@ import {
   SQUAD_DETAIL_SELECT,
   SQUAD_SUMMARY_SELECT,
 } from '@app/squads/constants/squads.constants.js';
-import type { ISquadMemberChanges } from '@app/squads/interfaces/squad-rules.interfaces.js';
+import { findAddMemberViolation } from '@app/squads/helpers/squad-rules.helper.js';
+import type {
+  IAddMemberResult,
+  IRemoveMemberResult,
+  ISquadMemberChanges,
+} from '@app/squads/interfaces/squad-rules.interfaces.js';
 import type { TSquadDetailRow, TSquadSummaryRow } from '@app/squads/types/squad.types.js';
 import { PrismaService } from '@infrastructure/prisma/service/prisma.service.js';
 import type { TPrismaTransaction } from '@infrastructure/prisma/types/prisma.types.js';
@@ -74,6 +79,50 @@ export class SquadsRepository {
       });
 
       return true;
+    });
+  }
+
+  addMemberOwned(id: string, userId: string, characterId: number): Promise<IAddMemberResult> {
+    return this.prismaService.$transaction(async (transaction) => {
+      if (!(await this.lockOwned(transaction, id, userId))) {
+        return { squadFound: false, violation: null };
+      }
+
+      const members = await transaction.squadMember.findMany({
+        where: { squadId: id },
+        select: { characterId: true },
+      });
+      const violation = findAddMemberViolation(
+        members.map((member) => member.characterId),
+        characterId,
+      );
+
+      if (violation) {
+        return { squadFound: true, violation };
+      }
+
+      await transaction.squadMember.create({ data: { squadId: id, characterId } });
+      await transaction.squad.update({ where: { id }, data: { updatedAt: new Date() } });
+
+      return { squadFound: true, violation: null };
+    });
+  }
+
+  removeMemberOwned(id: string, userId: string, characterId: number): Promise<IRemoveMemberResult> {
+    return this.prismaService.$transaction(async (transaction) => {
+      if (!(await this.lockOwned(transaction, id, userId))) {
+        return { squadFound: false, removed: false };
+      }
+
+      const result = await transaction.squadMember.deleteMany({
+        where: { squadId: id, characterId },
+      });
+
+      if (result.count > 0) {
+        await transaction.squad.update({ where: { id }, data: { updatedAt: new Date() } });
+      }
+
+      return { squadFound: true, removed: result.count > 0 };
     });
   }
 
