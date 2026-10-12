@@ -8,6 +8,7 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
+  CHARACTERS_JSON_PATH: z.string().min(1).default('../frontend/src/data/characters.json'),
   CORS_ORIGINS: z.string().default('http://localhost:8080'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   LOG_PRETTY: z.stringbool().default(false),

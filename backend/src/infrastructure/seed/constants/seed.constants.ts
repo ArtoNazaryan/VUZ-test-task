@@ -1,0 +1,1 @@
+export const SEED_TRANSACTION_TIMEOUT_MS = 60_000;

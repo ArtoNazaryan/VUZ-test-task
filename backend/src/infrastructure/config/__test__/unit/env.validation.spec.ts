@@ -13,6 +13,7 @@ describe('validateEnv', () => {
       ...requiredEnv,
       NODE_ENV: NodeEnv.Development,
       PORT: 3000,
+      CHARACTERS_JSON_PATH: '../frontend/src/data/characters.json',
       CORS_ORIGINS: 'http://localhost:8080',
       LOG_LEVEL: 'info',
       LOG_PRETTY: false,
