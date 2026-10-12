@@ -62,6 +62,20 @@ describe('app routes', () => {
       expect(screen.getByRole('heading', { name: HOME_HEADING })).toBeInTheDocument();
     });
 
+    it('shows the masthead with the user and goes to the login page after logging out', async () => {
+      mswServer.use(
+        http.post(`${API_URL}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
+      );
+      renderRoutes('/', 'authenticated');
+
+      expect(screen.getByText('ryu@example.com')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Log out' }));
+
+      expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument();
+      expect(screen.queryByText('ryu@example.com')).not.toBeInTheDocument();
+    });
+
     it('sends the login page back to the home page', () => {
       const router = renderRoutes('/login', 'authenticated');
 
