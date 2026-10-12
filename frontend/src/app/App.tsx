@@ -1,4 +1,5 @@
 import { AppThemeProvider } from '@/app/providers/AppThemeProvider.tsx';
+import { RealtimeBridge } from '@/app/providers/RealtimeBridge.tsx';
 import { SessionBootstrap } from '@/app/providers/SessionBootstrap.tsx';
 import { router } from '@/app/router/router.ts';
 import { appStore } from '@/app/store/store.ts';
@@ -14,6 +15,7 @@ export function App(): ReactElement {
         <SessionBootstrap>
           <RouterProvider router={router} />
           <NotificationsHost />
+          <RealtimeBridge />
         </SessionBootstrap>
       </AppThemeProvider>
     </Provider>

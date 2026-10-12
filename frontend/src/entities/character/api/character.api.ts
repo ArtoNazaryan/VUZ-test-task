@@ -4,6 +4,7 @@ import type {
   ICharacterListArgs,
   ICharacterPage,
 } from '@/entities/character/model/character.interfaces.ts';
+import type { IPopularitySnapshot } from '@/entities/character/model/popularity.interfaces.ts';
 import { baseApi } from '@/shared/api/index.ts';
 
 export const characterApi = baseApi.injectEndpoints({
@@ -18,10 +19,14 @@ export const characterApi = baseApi.injectEndpoints({
         params: buildCharacterQueryParams(queryArg, pageParam),
       }),
     }),
+    getPopularity: build.query<IPopularitySnapshot, undefined>({
+      query: () => '/popularity',
+    }),
     getCharacterFilters: build.query<ICharacterFilterOptions, undefined>({
       query: () => '/characters/filters',
     }),
   }),
 });
 
-export const { useGetCharactersInfiniteQuery, useGetCharacterFiltersQuery } = characterApi;
+export const { useGetCharactersInfiniteQuery, useGetCharacterFiltersQuery, useGetPopularityQuery } =
+  characterApi;

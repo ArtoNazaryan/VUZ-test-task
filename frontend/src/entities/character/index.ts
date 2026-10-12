@@ -2,7 +2,9 @@ export {
   characterApi,
   useGetCharacterFiltersQuery,
   useGetCharactersInfiniteQuery,
+  useGetPopularityQuery,
 } from './api/character.api.ts';
+export { isPopularitySnapshot } from './lib/popularity.helper.ts';
 export type {
   ICharacterFiltersRootState,
   ICharacterFiltersState,
@@ -33,3 +35,4 @@ export type {
 export { AbilityScore } from './ui/AbilityScore/AbilityScore.tsx';
 export { CharacterAvatar } from './ui/CharacterAvatar/CharacterAvatar.tsx';
 export { TagBadge } from './ui/TagBadge/TagBadge.tsx';
+export type { IPopularCharacter, IPopularitySnapshot } from './model/popularity.interfaces.ts';

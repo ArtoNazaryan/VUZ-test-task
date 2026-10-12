@@ -3,6 +3,7 @@ import { CharacterFilters, ClearFiltersButton } from '@/features/character-filte
 import { CharacterSearch } from '@/features/character-search/index.ts';
 import { useDebouncedValue } from '@/shared/lib/hooks/useDebouncedValue.ts';
 import { CharacterTable } from '@/widgets/character-table/index.ts';
+import { PopularityStrip } from '@/widgets/popularity-strip/index.ts';
 import { SquadHeader } from '@/widgets/squad-header/index.ts';
 import { Container, Stack } from '@mui/material';
 import { type ReactElement, useMemo } from 'react';
@@ -22,6 +23,7 @@ export function SquadBuilderPage(): ReactElement {
     <Container maxWidth="lg" sx={{ pb: 6 }}>
       <Stack spacing={4}>
         <SquadHeader />
+        <PopularityStrip />
         <CharacterSearch />
         <CharacterFilters />
         <CharacterTable

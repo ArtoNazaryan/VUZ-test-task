@@ -10,6 +10,7 @@ export {
 } from './api/squad.api.ts';
 export { formatAverage } from './lib/squad-stats.helper.ts';
 export { buildActiveSquadStorageKey, resolveActiveSquadId } from './lib/active-squad.helper.ts';
+export { isSquadChangedMessage, refetchChangedSquad } from './lib/squad-change.helper.ts';
 export {
   activeSquadChanged,
   activeSquadSlice,
@@ -33,3 +34,5 @@ export type {
 } from './model/squad.interfaces.ts';
 export { SquadMemberAvatar } from './ui/SquadMemberAvatar/SquadMemberAvatar.tsx';
 export { SquadStats } from './ui/SquadStats/SquadStats.tsx';
+export type { ISquadChangedMessage } from './model/squad-change.interfaces.ts';
+export type { TSquadChange } from './model/squad-change.types.ts';
