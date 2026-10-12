@@ -17,6 +17,7 @@ describe('CharactersService', () => {
   const repository = {
     findPage: vi.fn<(filters: ICharacterListFilters, take: number) => Promise<TCharacterRow[]>>(),
     findById: vi.fn<(id: number) => Promise<TCharacterRow | null>>(),
+    findManyByIds: vi.fn<(ids: number[]) => Promise<TCharacterRow[]>>(),
     findUniverseNames: vi.fn<() => Promise<string[]>>(),
     findTagNames: vi.fn<() => Promise<string[]>>(),
     findAbilityNames: vi.fn<() => Promise<string[]>>(),
@@ -118,6 +119,24 @@ describe('CharactersService', () => {
       await expect(service.list(query({ cursor: descendingCursor }))).rejects.toMatchObject({
         code: ErrorCode.ValidationError,
       });
+    });
+  });
+
+  describe('getManyByIds', () => {
+    it('returns the characters in the order of the requested ids', async () => {
+      repository.findManyByIds.mockResolvedValue([
+        makeCharacterRow({ id: 1, name: 'Cassie Cage' }),
+        makeCharacterRow({ id: 2, name: 'Baraka' }),
+      ]);
+
+      const characters = await service.getManyByIds([2, 1]);
+
+      expect(characters.map((character) => character.name)).toEqual(['Baraka', 'Cassie Cage']);
+    });
+
+    it('does not query the database for an empty list', async () => {
+      await expect(service.getManyByIds([])).resolves.toEqual([]);
+      expect(repository.findManyByIds).not.toHaveBeenCalled();
     });
   });
 

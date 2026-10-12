@@ -29,6 +29,7 @@ model Character {
   universe   Universe           @relation(fields: [universeId], references: [id])
   tags       CharacterTag[]
   abilities  CharacterAbility[]
+  squads     SquadMember[]
   createdAt  DateTime           @default(now()) @map("created_at")
   updatedAt  DateTime           @updatedAt @map("updated_at")
 
@@ -84,6 +85,7 @@ model User {
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   refreshTokens RefreshToken[]
+  squads        Squad[]
 
   @@map("users")
 }
@@ -99,4 +101,29 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model Squad {
+  id        String        @id @default(uuid(7)) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  name      String        @db.VarChar(50)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members   SquadMember[]
+
+  @@unique([userId, name])
+  @@map("squads")
+}
+
+model SquadMember {
+  squadId     String    @map("squad_id") @db.Uuid
+  characterId Int       @map("character_id")
+  addedAt     DateTime  @default(now()) @map("added_at")
+  squad       Squad     @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id])
+
+  @@id([squadId, characterId])
+  @@index([characterId])
+  @@map("squad_members")
 }

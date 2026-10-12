@@ -6,5 +6,6 @@ import { Module } from '@nestjs/common';
 @Module({
   controllers: [CharactersController],
   providers: [CharactersService, CharactersRepository],
+  exports: [CharactersService],
 })
 export class CharactersModule {}

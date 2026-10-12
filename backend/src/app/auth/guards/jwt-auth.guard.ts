@@ -29,7 +29,13 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private async verifyToken(token: string): Promise<IAccessTokenPayload> {
-    const payload: unknown = await this.jwtService.verifyAsync(token).catch(() => null);
+    let payload: unknown;
+
+    try {
+      payload = await this.jwtService.verifyAsync(token);
+    } catch {
+      throw this.unauthorized();
+    }
 
     if (!isAccessTokenPayload(payload)) {
       throw this.unauthorized();

@@ -10,6 +10,7 @@ import {
   buildItemCacheSuffix,
   buildListCacheSuffix,
 } from '@app/characters/helpers/characters-cache-key.helper.js';
+import { orderByIds } from '@app/characters/helpers/order-by-ids.helper.js';
 import { compareAbilityNames } from '@app/characters/helpers/ability-order.helper.js';
 import { toCharacterResponse } from '@app/characters/mappers/character.mapper.js';
 import { CharactersRepository } from '@app/characters/repositories/characters.repository.js';
@@ -45,6 +46,16 @@ export class CharactersService {
       CHARACTERS_CACHE_TTL_SECONDS,
       () => this.loadById(id),
     );
+  }
+
+  async getManyByIds(ids: number[]): Promise<CharacterResponseDto[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const rows = await this.charactersRepository.findManyByIds(ids);
+
+    return orderByIds(rows.map(toCharacterResponse), ids);
   }
 
   getFilters(): Promise<CharacterFiltersResponseDto> {

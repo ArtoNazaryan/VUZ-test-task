@@ -14,4 +14,5 @@ export enum ErrorCode {
   SquadFull = 'SQUAD_FULL',
   CharacterAlreadyInSquad = 'CHARACTER_ALREADY_IN_SQUAD',
   CharacterNotFound = 'CHARACTER_NOT_FOUND',
+  SquadNameTaken = 'SQUAD_NAME_TAKEN',
 }

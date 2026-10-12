@@ -21,6 +21,13 @@ export class CharactersRepository {
     });
   }
 
+  findManyByIds(ids: number[]): Promise<TCharacterRow[]> {
+    return this.prismaService.character.findMany({
+      where: { id: { in: ids } },
+      select: CHARACTER_SELECT,
+    });
+  }
+
   findById(id: number): Promise<TCharacterRow | null> {
     return this.prismaService.character.findUnique({ where: { id }, select: CHARACTER_SELECT });
   }
