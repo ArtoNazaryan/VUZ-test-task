@@ -6,6 +6,7 @@ import type { TConfigService } from '@infrastructure/common/types/env.types.js';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
@@ -18,6 +19,7 @@ async function bootstrap(): Promise<void> {
   app.useLogger(logger);
   app.setGlobalPrefix(API_PREFIX);
   app.use(helmet());
+  app.use(cookieParser());
   app.enableCors({
     origin: parseCorsOrigins(configService.get('CORS_ORIGINS', { infer: true })),
     credentials: true,
@@ -34,6 +36,7 @@ async function bootstrap(): Promise<void> {
         .setDescription('Characters, authentication and squad management for Squad of Champions.')
         .setVersion('1.0.0')
         .addBearerAuth()
+        .addCookieAuth('refresh_token')
         .build(),
     );
 

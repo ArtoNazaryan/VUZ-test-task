@@ -5,6 +5,7 @@ import { RedisService } from '@infrastructure/redis/service/redis.service.js';
 import { InMemoryRedisService } from '@infrastructure/test/mocks/redis/in-memory-redis.service.js';
 import type { INestApplication } from '@nestjs/common';
 import { Test, type TestingModuleBuilder } from '@nestjs/testing';
+import cookieParser from 'cookie-parser';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../../../app.module.js';
 
@@ -18,6 +19,7 @@ export async function createIntegrationApp(
   const app = moduleRef.createNestApplication<INestApplication<App>>({ logger: false });
 
   app.setGlobalPrefix(API_PREFIX);
+  app.use(cookieParser());
   app.useGlobalPipes(buildGlobalValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
   await app.init();

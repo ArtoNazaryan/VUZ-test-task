@@ -10,6 +10,8 @@ export const envSchema = z.object({
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(900),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  COOKIE_SECURE: z.stringbool().default(false),
   CHARACTERS_JSON_PATH: z.string().min(1).default('../frontend/src/data/characters.json'),
   CORS_ORIGINS: z.string().default('http://localhost:8080'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),

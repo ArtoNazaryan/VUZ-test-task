@@ -3,29 +3,90 @@ import type { AuthResponseDto } from '@app/auth/dto/auth-response.dto.js';
 import { LoginDto } from '@app/auth/dto/login.dto.js';
 import { RegisterDto } from '@app/auth/dto/register.dto.js';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-auth.guard.js';
+import { readRefreshTokenCookie } from '@app/auth/helpers/refresh-cookie.helper.js';
 import type { IAuthUser } from '@app/auth/interfaces/auth.interfaces.js';
+import { AuthCookieService } from '@app/auth/services/auth-cookie.service.js';
 import { AuthService } from '@app/auth/services/auth.service.js';
-import { ApiGetProfile, ApiLogin, ApiRegister } from '@app/auth/swagger/auth.swagger.js';
+import {
+  ApiGetProfile,
+  ApiLogin,
+  ApiLogout,
+  ApiRefresh,
+  ApiRegister,
+} from '@app/auth/swagger/auth.swagger.js';
 import type { UserResponseDto } from '@app/users/dto/user-response.dto.js';
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly authCookieService: AuthCookieService,
+  ) {}
 
   @Post('register')
   @ApiRegister()
-  register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
-    return this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthResponseDto> {
+    const session = await this.authService.register(dto);
+
+    this.authCookieService.setRefreshToken(response, session.refreshToken);
+
+    return session.response;
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiLogin()
-  login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthResponseDto> {
+    const session = await this.authService.login(dto);
+
+    this.authCookieService.setRefreshToken(response, session.refreshToken);
+
+    return session.response;
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiRefresh()
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthResponseDto> {
+    const session = await this.authService.refresh(readRefreshTokenCookie(request));
+
+    this.authCookieService.setRefreshToken(response, session.refreshToken);
+
+    return session.response;
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiLogout()
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.authService.logout(readRefreshTokenCookie(request));
+    this.authCookieService.clearRefreshToken(response);
   }
 
   @Get('me')

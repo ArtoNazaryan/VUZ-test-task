@@ -15,6 +15,8 @@ describe('validateEnv', () => {
       NODE_ENV: NodeEnv.Development,
       PORT: 3000,
       JWT_ACCESS_TTL_SECONDS: 900,
+      REFRESH_TOKEN_TTL_DAYS: 7,
+      COOKIE_SECURE: false,
       CHARACTERS_JSON_PATH: '../frontend/src/data/characters.json',
       CORS_ORIGINS: 'http://localhost:8080',
       LOG_LEVEL: 'info',
