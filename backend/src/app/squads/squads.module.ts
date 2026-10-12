@@ -9,5 +9,6 @@ import { Module } from '@nestjs/common';
   imports: [AuthModule, CharactersModule],
   controllers: [SquadsController],
   providers: [SquadsService, SquadsRepository],
+  exports: [SquadsService],
 })
 export class SquadsModule {}

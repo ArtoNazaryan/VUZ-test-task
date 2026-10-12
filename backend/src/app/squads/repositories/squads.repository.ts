@@ -5,6 +5,7 @@ import {
 import { findAddMemberViolation } from '@app/squads/helpers/squad-rules.helper.js';
 import type {
   IAddMemberResult,
+  IPickCount,
   IRemoveMemberResult,
   ISquadMemberChanges,
 } from '@app/squads/interfaces/squad-rules.interfaces.js';
@@ -124,6 +125,20 @@ export class SquadsRepository {
 
       return { squadFound: true, removed: result.count > 0 };
     });
+  }
+
+  async findMostPicked(limit: number): Promise<IPickCount[]> {
+    const groups = await this.prismaService.squadMember.groupBy({
+      by: ['characterId'],
+      _count: { characterId: true },
+      orderBy: [{ _count: { characterId: 'desc' } }, { characterId: 'asc' }],
+      take: limit,
+    });
+
+    return groups.map((group) => ({
+      characterId: group.characterId,
+      pickCount: group._count.characterId,
+    }));
   }
 
   async deleteOwned(id: string, userId: string): Promise<boolean> {

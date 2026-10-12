@@ -16,7 +16,10 @@ import type {
   ISquadEventPayload,
   ISquadMemberEventPayload,
 } from '@app/squads/interfaces/squad-events.interfaces.js';
-import type { IAddMemberResult } from '@app/squads/interfaces/squad-rules.interfaces.js';
+import type {
+  IAddMemberResult,
+  IPickCount,
+} from '@app/squads/interfaces/squad-rules.interfaces.js';
 import { toSquadResponse, toSquadSummaryResponse } from '@app/squads/mappers/squad.mapper.js';
 import { SquadsRepository } from '@app/squads/repositories/squads.repository.js';
 import { Injectable } from '@nestjs/common';
@@ -29,6 +32,10 @@ export class SquadsService {
     private readonly charactersService: CharactersService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  getMostPicked(limit: number): Promise<IPickCount[]> {
+    return this.squadsRepository.findMostPicked(limit);
+  }
 
   async list(userId: string): Promise<SquadSummaryResponseDto[]> {
     const rows = await this.squadsRepository.findAllByUser(userId);

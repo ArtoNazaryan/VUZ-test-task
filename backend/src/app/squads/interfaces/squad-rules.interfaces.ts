@@ -36,3 +36,8 @@ export interface IRemoveMemberResult {
   squadFound: boolean;
   removed: boolean;
 }
+
+export interface IPickCount {
+  characterId: number;
+  pickCount: number;
+}

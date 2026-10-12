@@ -24,7 +24,10 @@ export class CacheService {
       return load();
     }
 
-    const key = buildVersionedKey(namespace, version, suffix);
+    return this.getOrSet(buildVersionedKey(namespace, version, suffix), ttlSeconds, load);
+  }
+
+  async getOrSet<T>(key: string, ttlSeconds: number, load: () => Promise<T>): Promise<T> {
     const cached = await this.readValue(key);
 
     if (cached !== null) {
@@ -36,6 +39,10 @@ export class CacheService {
     await this.writeValue(key, JSON.stringify(value), ttlSeconds);
 
     return value;
+  }
+
+  async set(key: string, value: unknown, ttlSeconds: number): Promise<void> {
+    await this.writeValue(key, JSON.stringify(value), ttlSeconds);
   }
 
   async bumpVersion(namespace: string): Promise<number | null> {

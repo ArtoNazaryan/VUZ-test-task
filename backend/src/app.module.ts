@@ -1,6 +1,7 @@
 import { AuthModule } from '@app/auth/auth.module.js';
 import { CharactersModule } from '@app/characters/characters.module.js';
 import { HealthModule } from '@app/health/health.module.js';
+import { PopularityModule } from '@app/popularity/popularity.module.js';
 import { RealtimeModule } from '@app/realtime/realtime.module.js';
 import { SquadsModule } from '@app/squads/squads.module.js';
 import { CacheModule } from '@infrastructure/cache/cache.module.js';
@@ -27,6 +28,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     AuthModule,
     SquadsModule,
     RealtimeModule,
+    PopularityModule,
   ],
 })
 export class AppModule {}

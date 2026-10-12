@@ -46,6 +46,7 @@ async function bootstrap(): Promise<void> {
           'The character catalogue: list with filters, details and filter values',
         )
         .addTag('Squads', 'Your squads of up to 6 characters with ability averages')
+        .addTag('Popularity', 'Most picked characters right now, also pushed over WebSocket')
         .addTag('Health', 'Liveness of the API, PostgreSQL and Redis')
         .addBearerAuth()
         .addCookieAuth('refresh_token')

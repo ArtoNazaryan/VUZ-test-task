@@ -111,4 +111,29 @@ describe('CacheService', () => {
       await expect(service.bumpVersion('characters')).resolves.toBeNull();
     });
   });
+
+  describe('getOrSet', () => {
+    it('stores a plain key and serves it from the cache afterwards', async () => {
+      const redis = new InMemoryRedisService();
+      const service = await createCacheService(redis);
+      const load = vi.fn(() => Promise.resolve({ top: [1, 2] }));
+
+      await service.getOrSet('popularity:top', 60, load);
+      await service.getOrSet('popularity:top', 60, load);
+
+      expect(load).toHaveBeenCalledTimes(1);
+      await expect(redis.get('popularity:top')).resolves.toBe('{"top":[1,2]}');
+    });
+  });
+
+  describe('set', () => {
+    it('overwrites a cached value', async () => {
+      const redis = new InMemoryRedisService();
+      const service = await createCacheService(redis);
+
+      await service.set('popularity:top', { top: [3] }, 60);
+
+      await expect(redis.get('popularity:top')).resolves.toBe('{"top":[3]}');
+    });
+  });
 });
