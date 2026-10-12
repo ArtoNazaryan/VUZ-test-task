@@ -4,6 +4,7 @@ import { HealthModule } from '@app/health/health.module.js';
 import { CacheModule } from '@infrastructure/cache/cache.module.js';
 import { validateEnv } from '@infrastructure/config/env.validation.js';
 import { LoggerModule } from '@infrastructure/logger/logger.module.js';
+import { RateLimitModule } from '@infrastructure/rate-limit/rate-limit.module.js';
 import { PrismaModule } from '@infrastructure/prisma/prisma.module.js';
 import { RedisModule } from '@infrastructure/redis/redis.module.js';
 import { Module } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
     PrismaModule,
     RedisModule,
     CacheModule,
+    RateLimitModule,
     HealthModule,
     CharactersModule,
     AuthModule,

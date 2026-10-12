@@ -14,6 +14,7 @@ import {
   ApiRefresh,
   ApiRegister,
 } from '@app/auth/swagger/auth.swagger.js';
+import { StrictRateLimit } from '@infrastructure/rate-limit/decorators/strict-rate-limit.decorator.js';
 import type { UserResponseDto } from '@app/users/dto/user-response.dto.js';
 import {
   Body,
@@ -38,6 +39,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @StrictRateLimit()
   @ApiRegister()
   async register(
     @Body() dto: RegisterDto,
@@ -51,6 +53,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @StrictRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiLogin()
   async login(
@@ -65,6 +68,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @StrictRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiRefresh()
   async refresh(

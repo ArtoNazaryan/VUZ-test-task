@@ -1,6 +1,7 @@
 import type { TEnv } from '@infrastructure/common/types/env.types.js';
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { IRateLimitCounter } from '@infrastructure/common/interfaces/rate-limit.interfaces.js';
 import { Redis } from 'ioredis';
 
 @Injectable()
@@ -32,6 +33,18 @@ export class RedisService implements OnModuleDestroy {
 
   async incr(key: string): Promise<number> {
     return this.client.incr(key);
+  }
+
+  async incrementWithExpiry(key: string, ttlMs: number): Promise<IRateLimitCounter> {
+    const results = await this.client.multi().incr(key).pexpire(key, ttlMs, 'NX').pttl(key).exec();
+    const count = results?.[0]?.[1];
+    const remainingMs = results?.[2]?.[1];
+
+    if (typeof count !== 'number' || typeof remainingMs !== 'number') {
+      throw new Error(`[RedisService] Unexpected rate limit result for ${key}`);
+    }
+
+    return { count, ttlMs: remainingMs > 0 ? remainingMs : ttlMs };
   }
 
   async onModuleDestroy(): Promise<void> {

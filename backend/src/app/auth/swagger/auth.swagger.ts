@@ -11,6 +11,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
@@ -23,6 +24,7 @@ export function ApiRegister(): MethodDecorator {
     ApiCreatedResponse({ type: AuthResponseDto }),
     ApiBadRequestResponse({ description: 'Invalid email or password shorter than 8 characters' }),
     ApiConflictResponse({ description: 'EMAIL_TAKEN: an account with this email exists' }),
+    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
   );
 }
 
@@ -34,6 +36,7 @@ export function ApiLogin(): MethodDecorator {
     }),
     ApiOkResponse({ type: AuthResponseDto }),
     ApiUnauthorizedResponse({ description: 'INVALID_CREDENTIALS: wrong email or password' }),
+    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
   );
 }
 
@@ -56,6 +59,7 @@ export function ApiRefresh(): MethodDecorator {
     ApiCookieAuth(REFRESH_TOKEN_COOKIE),
     ApiOkResponse({ type: AuthResponseDto }),
     ApiUnauthorizedResponse({ description: 'Missing, expired, revoked or reused refresh token' }),
+    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
   );
 }
 
