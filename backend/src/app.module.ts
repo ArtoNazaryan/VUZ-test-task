@@ -1,3 +1,4 @@
+import { AuthModule } from '@app/auth/auth.module.js';
 import { CharactersModule } from '@app/characters/characters.module.js';
 import { HealthModule } from '@app/health/health.module.js';
 import { CacheModule } from '@infrastructure/cache/cache.module.js';
@@ -17,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
     CacheModule,
     HealthModule,
     CharactersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

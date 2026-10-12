@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 const requiredEnv = {
   DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
   REDIS_URL: 'redis://localhost:6379',
+  JWT_ACCESS_SECRET: 'test-only-secret-that-is-at-least-32-characters',
 };
 
 describe('validateEnv', () => {
@@ -13,6 +14,7 @@ describe('validateEnv', () => {
       ...requiredEnv,
       NODE_ENV: NodeEnv.Development,
       PORT: 3000,
+      JWT_ACCESS_TTL_SECONDS: 900,
       CHARACTERS_JSON_PATH: '../frontend/src/data/characters.json',
       CORS_ORIGINS: 'http://localhost:8080',
       LOG_LEVEL: 'info',
@@ -41,12 +43,18 @@ describe('validateEnv', () => {
   });
 
   it('throws when DATABASE_URL is missing', () => {
-    expect(() => validateEnv({ REDIS_URL: requiredEnv.REDIS_URL })).toThrow(/DATABASE_URL/);
+    expect(() => validateEnv({ ...requiredEnv, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
   });
 
   it('throws when REDIS_URL is not a redis URL', () => {
     expect(() => validateEnv({ ...requiredEnv, REDIS_URL: 'http://localhost:6379' })).toThrow(
       /REDIS_URL/,
+    );
+  });
+
+  it('throws when JWT_ACCESS_SECRET is shorter than 32 characters', () => {
+    expect(() => validateEnv({ ...requiredEnv, JWT_ACCESS_SECRET: 'too-short' })).toThrow(
+      /JWT_ACCESS_SECRET/,
     );
   });
 });

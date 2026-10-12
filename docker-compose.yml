@@ -34,8 +34,7 @@ services:
     build:
       context: ./backend
     env_file:
-      - path: ./backend/.env
-        required: false
+      - ./backend/.env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://squad:squad@postgres:5432/squad_of_champions?schema=public
