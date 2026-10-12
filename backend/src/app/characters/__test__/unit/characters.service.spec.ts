@@ -18,6 +18,7 @@ describe('CharactersService', () => {
     findPage: vi.fn<(filters: ICharacterListFilters, take: number) => Promise<TCharacterRow[]>>(),
     findById: vi.fn<(id: number) => Promise<TCharacterRow | null>>(),
     findManyByIds: vi.fn<(ids: number[]) => Promise<TCharacterRow[]>>(),
+    findExistingIds: vi.fn<(ids: number[]) => Promise<number[]>>(),
     findUniverseNames: vi.fn<() => Promise<string[]>>(),
     findTagNames: vi.fn<() => Promise<string[]>>(),
     findAbilityNames: vi.fn<() => Promise<string[]>>(),
@@ -137,6 +138,19 @@ describe('CharactersService', () => {
     it('does not query the database for an empty list', async () => {
       await expect(service.getManyByIds([])).resolves.toEqual([]);
       expect(repository.findManyByIds).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findExistingIds', () => {
+    it('returns the ids that exist as a set', async () => {
+      repository.findExistingIds.mockResolvedValue([1, 25]);
+
+      await expect(service.findExistingIds([1, 25, 9999])).resolves.toEqual(new Set([1, 25]));
+    });
+
+    it('does not query the database for an empty list', async () => {
+      await expect(service.findExistingIds([])).resolves.toEqual(new Set());
+      expect(repository.findExistingIds).not.toHaveBeenCalled();
     });
   });
 

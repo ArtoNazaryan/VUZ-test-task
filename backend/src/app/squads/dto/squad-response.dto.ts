@@ -1,4 +1,5 @@
 import { CharacterResponseDto } from '@app/characters/dto/character-response.dto.js';
+import { SquadStatsDto } from '@app/squads/dto/squad-stats.dto.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SquadResponseDto {
@@ -13,6 +14,9 @@ export class SquadResponseDto {
     description: 'Members in the order they were added',
   })
   characters: CharacterResponseDto[];
+
+  @ApiProperty({ type: SquadStatsDto })
+  stats: SquadStatsDto;
 
   @ApiProperty()
   createdAt: Date;

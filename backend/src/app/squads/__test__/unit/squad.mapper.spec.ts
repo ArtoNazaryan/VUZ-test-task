@@ -19,9 +19,15 @@ describe('toSquadSummaryResponse', () => {
 });
 
 describe('toSquadResponse', () => {
-  it('returns the squad with the given characters', () => {
+  it('returns the squad with the given characters and stats', () => {
+    const stats = { memberCount: 0, abilities: [{ name: 'Power', average: null }] };
+
     expect(
-      toSquadResponse({ id: 'squad-1', name: 'Earthrealm', createdAt, updatedAt, members: [] }, []),
-    ).toEqual({ id: 'squad-1', name: 'Earthrealm', characters: [], createdAt, updatedAt });
+      toSquadResponse(
+        { id: 'squad-1', name: 'Earthrealm', createdAt, updatedAt, members: [] },
+        [],
+        stats,
+      ),
+    ).toEqual({ id: 'squad-1', name: 'Earthrealm', characters: [], stats, createdAt, updatedAt });
   });
 });

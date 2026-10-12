@@ -28,6 +28,15 @@ export class CharactersRepository {
     });
   }
 
+  async findExistingIds(ids: number[]): Promise<number[]> {
+    const rows = await this.prismaService.character.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+
+    return rows.map((row) => row.id);
+  }
+
   findById(id: number): Promise<TCharacterRow | null> {
     return this.prismaService.character.findUnique({ where: { id }, select: CHARACTER_SELECT });
   }

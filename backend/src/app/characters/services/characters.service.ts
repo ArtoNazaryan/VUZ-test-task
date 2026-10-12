@@ -58,6 +58,14 @@ export class CharactersService {
     return orderByIds(rows.map(toCharacterResponse), ids);
   }
 
+  async findExistingIds(ids: number[]): Promise<Set<number>> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+
+    return new Set(await this.charactersRepository.findExistingIds(ids));
+  }
+
   getFilters(): Promise<CharacterFiltersResponseDto> {
     return this.cacheService.getOrSetVersioned(
       CHARACTERS_CACHE_NAMESPACE,
