@@ -5,7 +5,17 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['dist', 'coverage', 'node_modules', 'eslint.config.mjs', 'vitest*.config.ts'] },
+  {
+    ignores: [
+      'dist',
+      'coverage',
+      'node_modules',
+      'eslint.config.mjs',
+      'vitest*.config.ts',
+      'prisma.config.ts',
+      'src/infrastructure/prisma/generated',
+    ],
+  },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,

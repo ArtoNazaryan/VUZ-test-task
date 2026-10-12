@@ -10,3 +10,4 @@ coverage/
 .env.*
 !.env.example
 *.tsbuildinfo
+backend/src/infrastructure/prisma/generated/
