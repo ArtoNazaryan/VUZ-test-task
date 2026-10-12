@@ -1,3 +1,5 @@
+import { CacheService } from '@infrastructure/cache/service/cache.service.js';
+import { CHARACTERS_CACHE_NAMESPACE } from '@infrastructure/common/constants/cache.constants.js';
 import type { TEnv } from '@infrastructure/common/types/env.types.js';
 import type { TPrismaTransaction } from '@infrastructure/prisma/types/prisma.types.js';
 import { PrismaService } from '@infrastructure/prisma/service/prisma.service.js';
@@ -23,6 +25,7 @@ export class CharacterSeedService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService<TEnv, true>,
+    private readonly cacheService: CacheService,
   ) {}
 
   async seed(): Promise<ICharacterSeedSummary> {
@@ -34,9 +37,13 @@ export class CharacterSeedService {
       timeout: SEED_TRANSACTION_TIMEOUT_MS,
     });
 
+    const cacheVersion = await this.cacheService.bumpVersion(CHARACTERS_CACHE_NAMESPACE);
     const summary = await this.countRows();
 
-    this.logger.log({ filePath, ...summary }, '[CharacterSeedService] Character catalogue seeded');
+    this.logger.log(
+      { filePath, cacheVersion, ...summary },
+      '[CharacterSeedService] Character catalogue seeded',
+    );
 
     return summary;
   }

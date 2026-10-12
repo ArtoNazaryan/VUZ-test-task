@@ -1,5 +1,6 @@
 import { CharactersModule } from '@app/characters/characters.module.js';
 import { HealthModule } from '@app/health/health.module.js';
+import { CacheModule } from '@infrastructure/cache/cache.module.js';
 import { validateEnv } from '@infrastructure/config/env.validation.js';
 import { LoggerModule } from '@infrastructure/logger/logger.module.js';
 import { PrismaModule } from '@infrastructure/prisma/prisma.module.js';
@@ -13,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
     LoggerModule,
     PrismaModule,
     RedisModule,
+    CacheModule,
     HealthModule,
     CharactersModule,
   ],

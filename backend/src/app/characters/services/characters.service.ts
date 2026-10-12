@@ -6,18 +6,57 @@ import {
   decodeCharacterCursor,
   encodeCharacterCursor,
 } from '@app/characters/helpers/cursor.helper.js';
+import {
+  buildItemCacheSuffix,
+  buildListCacheSuffix,
+} from '@app/characters/helpers/characters-cache-key.helper.js';
 import { compareAbilityNames } from '@app/characters/helpers/ability-order.helper.js';
 import { toCharacterResponse } from '@app/characters/mappers/character.mapper.js';
 import { CharactersRepository } from '@app/characters/repositories/characters.repository.js';
+import { CacheService } from '@infrastructure/cache/service/cache.service.js';
+import {
+  CHARACTERS_CACHE_NAMESPACE,
+  CHARACTERS_CACHE_TTL_SECONDS,
+} from '@infrastructure/common/constants/cache.constants.js';
 import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { AppException } from '@infrastructure/common/helpers/app.exception.js';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CharactersService {
-  constructor(private readonly charactersRepository: CharactersRepository) {}
+  constructor(
+    private readonly charactersRepository: CharactersRepository,
+    private readonly cacheService: CacheService,
+  ) {}
 
-  async list(query: ListCharactersQueryDto): Promise<CharacterListResponseDto> {
+  list(query: ListCharactersQueryDto): Promise<CharacterListResponseDto> {
+    return this.cacheService.getOrSetVersioned(
+      CHARACTERS_CACHE_NAMESPACE,
+      buildListCacheSuffix(query),
+      CHARACTERS_CACHE_TTL_SECONDS,
+      () => this.loadPage(query),
+    );
+  }
+
+  getById(id: number): Promise<CharacterResponseDto> {
+    return this.cacheService.getOrSetVersioned(
+      CHARACTERS_CACHE_NAMESPACE,
+      buildItemCacheSuffix(id),
+      CHARACTERS_CACHE_TTL_SECONDS,
+      () => this.loadById(id),
+    );
+  }
+
+  getFilters(): Promise<CharacterFiltersResponseDto> {
+    return this.cacheService.getOrSetVersioned(
+      CHARACTERS_CACHE_NAMESPACE,
+      'filters',
+      CHARACTERS_CACHE_TTL_SECONDS,
+      () => this.loadFilters(),
+    );
+  }
+
+  private async loadPage(query: ListCharactersQueryDto): Promise<CharacterListResponseDto> {
     const after = query.cursor ? decodeCharacterCursor(query.cursor, query.sort) : undefined;
 
     if (after === null) {
@@ -51,7 +90,7 @@ export class CharactersService {
     };
   }
 
-  async getById(id: number): Promise<CharacterResponseDto> {
+  private async loadById(id: number): Promise<CharacterResponseDto> {
     const row = await this.charactersRepository.findById(id);
 
     if (!row) {
@@ -65,7 +104,7 @@ export class CharactersService {
     return toCharacterResponse(row);
   }
 
-  async getFilters(): Promise<CharacterFiltersResponseDto> {
+  private async loadFilters(): Promise<CharacterFiltersResponseDto> {
     const [universes, tags, abilities] = await Promise.all([
       this.charactersRepository.findUniverseNames(),
       this.charactersRepository.findTagNames(),

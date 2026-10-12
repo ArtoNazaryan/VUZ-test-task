@@ -1,6 +1,8 @@
+import { CacheModule } from '@infrastructure/cache/cache.module.js';
 import { validateEnv } from '@infrastructure/config/env.validation.js';
 import { LoggerModule } from '@infrastructure/logger/logger.module.js';
 import { PrismaModule } from '@infrastructure/prisma/prisma.module.js';
+import { RedisModule } from '@infrastructure/redis/redis.module.js';
 import { CharacterSeedService } from '@infrastructure/seed/services/character-seed.service.js';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -10,6 +12,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnv }),
     LoggerModule,
     PrismaModule,
+    RedisModule,
+    CacheModule,
   ],
   providers: [CharacterSeedService],
 })

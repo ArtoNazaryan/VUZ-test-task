@@ -5,6 +5,7 @@ import type { ICharacterListFilters } from '@app/characters/interfaces/character
 import { CharactersRepository } from '@app/characters/repositories/characters.repository.js';
 import { CharactersService } from '@app/characters/services/characters.service.js';
 import type { TCharacterRow } from '@app/characters/types/character.types.js';
+import { CacheService } from '@infrastructure/cache/service/cache.service.js';
 import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
 import { makeCharacterRow } from '@infrastructure/test/seeds/characters/factory/character-row.factory.js';
 import { HttpStatus } from '@nestjs/common';
@@ -21,9 +22,22 @@ describe('CharactersService', () => {
     findAbilityNames: vi.fn<() => Promise<string[]>>(),
   } satisfies Partial<CharactersRepository>;
 
+  const passThroughCache = {
+    getOrSetVersioned: <T>(
+      _namespace: string,
+      _suffix: string,
+      _ttlSeconds: number,
+      load: () => Promise<T>,
+    ): Promise<T> => load(),
+  };
+
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [CharactersService, { provide: CharactersRepository, useValue: repository }],
+      providers: [
+        CharactersService,
+        { provide: CharactersRepository, useValue: repository },
+        { provide: CacheService, useValue: passThroughCache },
+      ],
     }).compile();
 
     service = moduleRef.get(CharactersService);
