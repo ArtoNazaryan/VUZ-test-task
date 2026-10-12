@@ -2,6 +2,7 @@ import { API_PREFIX, SWAGGER_PATH } from '@infrastructure/common/constants/api.c
 import { GlobalExceptionFilter } from '@infrastructure/globals/global-exception.filter.js';
 import { buildGlobalValidationPipe } from '@infrastructure/globals/global-validation.pipe.js';
 import { parseCorsOrigins } from '@infrastructure/common/helpers/cors.helper.js';
+import { RedisIoAdapter } from '@infrastructure/realtime/adapters/redis-io.adapter.js';
 import type { TConfigService } from '@infrastructure/common/types/env.types.js';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -20,10 +21,12 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix(API_PREFIX);
   app.use(helmet());
   app.use(cookieParser());
-  app.enableCors({
-    origin: parseCorsOrigins(configService.get('CORS_ORIGINS', { infer: true })),
-    credentials: true,
-  });
+  const corsOrigins = parseCorsOrigins(configService.get('CORS_ORIGINS', { infer: true }));
+  const redisIoAdapter = new RedisIoAdapter(app, corsOrigins);
+
+  redisIoAdapter.connectToRedis(configService.get('REDIS_URL', { infer: true }));
+  app.useWebSocketAdapter(redisIoAdapter);
+  app.enableCors({ origin: corsOrigins, credentials: true });
   app.useGlobalPipes(buildGlobalValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.enableShutdownHooks();

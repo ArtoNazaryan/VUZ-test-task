@@ -11,6 +11,7 @@ import { AppModule } from '../../../app.module.js';
 
 export async function createIntegrationApp(
   customize: (builder: TestingModuleBuilder) => TestingModuleBuilder = (builder) => builder,
+  beforeInit: (app: INestApplication<App>) => void = () => undefined,
 ): Promise<INestApplication<App>> {
   const builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(RedisService)
@@ -22,6 +23,7 @@ export async function createIntegrationApp(
   app.use(cookieParser());
   app.useGlobalPipes(buildGlobalValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
+  beforeInit(app);
   await app.init();
 
   return app;

@@ -12,7 +12,7 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "incremental": true,
     "skipLibCheck": true,
     "strict": true,
@@ -30,5 +30,5 @@
       "@infrastructure/*": ["./src/infrastructure/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "prisma.config.ts", "vitest.config.ts", "vitest.int.config.ts"]
 }
