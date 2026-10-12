@@ -33,8 +33,17 @@ async function bootstrap(): Promise<void> {
       app,
       new DocumentBuilder()
         .setTitle('Squad of Champions API')
-        .setDescription('Characters, authentication and squad management for Squad of Champions.')
+        .setDescription(
+          'Characters, authentication and squad management for Squad of Champions. Squad and profile endpoints need an access token: log in, then click Authorize and paste the accessToken. The refresh token travels in the httpOnly refresh_token cookie. Every error uses the ErrorResponseDto shape.',
+        )
         .setVersion('1.0.0')
+        .addTag('Auth', 'Register, log in, refresh the access token and log out')
+        .addTag(
+          'Characters',
+          'The character catalogue: list with filters, details and filter values',
+        )
+        .addTag('Squads', 'Your squads of up to 6 characters with ability averages')
+        .addTag('Health', 'Liveness of the API, PostgreSQL and Redis')
         .addBearerAuth()
         .addCookieAuth('refresh_token')
         .build(),

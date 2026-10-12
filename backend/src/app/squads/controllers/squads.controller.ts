@@ -13,6 +13,7 @@ import {
   ApiGetSquad,
   ApiListSquads,
   ApiRemoveSquadMember,
+  ApiSquadsController,
   ApiUpdateSquad,
 } from '@app/squads/swagger/squads.swagger.js';
 import {
@@ -29,11 +30,8 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
-@ApiTags('Squads')
-@ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: 'Missing, invalid or expired access token' })
+@ApiSquadsController()
 @UseGuards(JwtAuthGuard)
 @Controller('squads')
 export class SquadsController {

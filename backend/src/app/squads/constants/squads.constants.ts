@@ -1,3 +1,5 @@
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import type { IApiErrorExample } from '@infrastructure/common/interfaces/error-response.interfaces.js';
 import type { SquadSelect } from '@infrastructure/prisma/generated/models.js';
 
 export const SQUAD_NAME_MAX_LENGTH = 50;
@@ -28,3 +30,36 @@ export const SQUAD_DETAIL_SELECT = {
     orderBy: [{ addedAt: 'asc' }, { characterId: 'asc' }],
   },
 } satisfies SquadSelect;
+
+export const SQUAD_NOT_FOUND_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.NotFound,
+  message: SQUAD_NOT_FOUND_MESSAGE,
+};
+
+export const SQUAD_NAME_TAKEN_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.SquadNameTaken,
+  message: SQUAD_NAME_TAKEN_MESSAGE,
+};
+
+export const SQUAD_FULL_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.SquadFull,
+  message: SQUAD_FULL_MESSAGE,
+  details: { limit: MAX_SQUAD_SIZE, requested: MAX_SQUAD_SIZE + 1 },
+};
+
+export const CHARACTER_ALREADY_IN_SQUAD_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.CharacterAlreadyInSquad,
+  message: CHARACTER_ALREADY_IN_SQUAD_MESSAGE,
+  details: { characterIds: [25] },
+};
+
+export const CHARACTER_NOT_FOUND_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.CharacterNotFound,
+  message: CHARACTER_NOT_FOUND_MESSAGE,
+  details: { characterIds: [9999] },
+};
+
+export const INVALID_SQUAD_ID_EXAMPLE: IApiErrorExample = {
+  error: ErrorCode.BadRequest,
+  message: 'Validation failed (uuid is expected)',
+};

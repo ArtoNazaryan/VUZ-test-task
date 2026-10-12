@@ -17,3 +17,9 @@ export interface IErrorResponse {
 export interface IHttpExceptionBody {
   message: string | string[];
 }
+
+export interface IApiErrorExample {
+  error: ErrorCode;
+  message: string;
+  details?: TErrorDetails;
+}

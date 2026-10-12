@@ -1,19 +1,36 @@
+import {
+  REFRESH_TOKEN_COOKIE,
+  SESSION_EXPIRED_EXAMPLE,
+} from '@app/auth/constants/auth.constants.js';
 import { AuthResponseDto } from '@app/auth/dto/auth-response.dto.js';
 import { UserResponseDto } from '@app/users/dto/user-response.dto.js';
-import { REFRESH_TOKEN_COOKIE } from '@app/auth/constants/auth.constants.js';
-import { applyDecorators } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
+  TOO_MANY_REQUESTS_EXAMPLE,
+  UNAUTHORIZED_EXAMPLE,
+} from '@infrastructure/common/constants/api-error-examples.constants.js';
+import { ApiErrorResponse } from '@infrastructure/common/decorators/api-error-response.decorator.js';
+import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
+import { applyDecorators, HttpStatus } from '@nestjs/common';
+import {
   ApiBearerAuth,
   ApiCookieAuth,
-  ApiNoContentResponse,
-  ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTooManyRequestsResponse,
-  ApiUnauthorizedResponse,
+  ApiTags,
 } from '@nestjs/swagger';
+
+export function ApiAuthController(): ClassDecorator {
+  return applyDecorators(
+    ApiTags('Auth'),
+    ApiErrorResponse(
+      HttpStatus.TOO_MANY_REQUESTS,
+      'Rate limit exceeded (register, login and refresh allow 10 requests per minute)',
+      TOO_MANY_REQUESTS_EXAMPLE,
+    ),
+  );
+}
 
 export function ApiRegister(): MethodDecorator {
   return applyDecorators(
@@ -22,9 +39,24 @@ export function ApiRegister(): MethodDecorator {
       description: 'Also sets the httpOnly refresh_token cookie.',
     }),
     ApiCreatedResponse({ type: AuthResponseDto }),
-    ApiBadRequestResponse({ description: 'Invalid email or password shorter than 8 characters' }),
-    ApiConflictResponse({ description: 'EMAIL_TAKEN: an account with this email exists' }),
-    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
+    ApiErrorResponse(
+      HttpStatus.BAD_REQUEST,
+      'Invalid email or password shorter than 8 characters',
+      {
+        error: ErrorCode.ValidationError,
+        message: 'Request validation failed',
+        details: [
+          {
+            field: 'password',
+            messages: ['password must be longer than or equal to 8 characters'],
+          },
+        ],
+      },
+    ),
+    ApiErrorResponse(HttpStatus.CONFLICT, 'An account with this email already exists', {
+      error: ErrorCode.EmailTaken,
+      message: 'An account with this email already exists',
+    }),
   );
 }
 
@@ -35,17 +67,10 @@ export function ApiLogin(): MethodDecorator {
       description: 'Also sets the httpOnly refresh_token cookie.',
     }),
     ApiOkResponse({ type: AuthResponseDto }),
-    ApiUnauthorizedResponse({ description: 'INVALID_CREDENTIALS: wrong email or password' }),
-    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
-  );
-}
-
-export function ApiGetProfile(): MethodDecorator {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get the profile of the logged in user' }),
-    ApiBearerAuth(),
-    ApiOkResponse({ type: UserResponseDto }),
-    ApiUnauthorizedResponse({ description: 'Missing, invalid or expired access token' }),
+    ApiErrorResponse(HttpStatus.UNAUTHORIZED, 'Wrong email or password', {
+      error: ErrorCode.InvalidCredentials,
+      message: 'Email or password is incorrect',
+    }),
   );
 }
 
@@ -58,8 +83,11 @@ export function ApiRefresh(): MethodDecorator {
     }),
     ApiCookieAuth(REFRESH_TOKEN_COOKIE),
     ApiOkResponse({ type: AuthResponseDto }),
-    ApiUnauthorizedResponse({ description: 'Missing, expired, revoked or reused refresh token' }),
-    ApiTooManyRequestsResponse({ description: 'TOO_MANY_REQUESTS: rate limit exceeded' }),
+    ApiErrorResponse(
+      HttpStatus.UNAUTHORIZED,
+      'Missing, expired, revoked or reused refresh token',
+      SESSION_EXPIRED_EXAMPLE,
+    ),
   );
 }
 
@@ -68,5 +96,18 @@ export function ApiLogout(): MethodDecorator {
     ApiOperation({ summary: 'Revoke the refresh token and clear its cookie' }),
     ApiCookieAuth(REFRESH_TOKEN_COOKIE),
     ApiNoContentResponse({ description: 'Logged out' }),
+  );
+}
+
+export function ApiGetProfile(): MethodDecorator {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get the profile of the logged in user' }),
+    ApiBearerAuth(),
+    ApiOkResponse({ type: UserResponseDto }),
+    ApiErrorResponse(
+      HttpStatus.UNAUTHORIZED,
+      'Missing, invalid or expired access token',
+      UNAUTHORIZED_EXAMPLE,
+    ),
   );
 }

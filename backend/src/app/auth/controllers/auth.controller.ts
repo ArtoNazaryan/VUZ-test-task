@@ -8,6 +8,7 @@ import type { IAuthUser } from '@app/auth/interfaces/auth.interfaces.js';
 import { AuthCookieService } from '@app/auth/services/auth-cookie.service.js';
 import { AuthService } from '@app/auth/services/auth.service.js';
 import {
+  ApiAuthController,
   ApiGetProfile,
   ApiLogin,
   ApiLogout,
@@ -27,10 +28,9 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
-@ApiTags('Auth')
+@ApiAuthController()
 @Controller('auth')
 export class AuthController {
   constructor(

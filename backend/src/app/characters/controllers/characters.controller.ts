@@ -4,14 +4,14 @@ import type { CharacterResponseDto } from '@app/characters/dto/character-respons
 import { ListCharactersQueryDto } from '@app/characters/dto/list-characters-query.dto.js';
 import { CharactersService } from '@app/characters/services/characters.service.js';
 import {
+  ApiCharactersController,
   ApiGetCharacter,
   ApiGetCharacterFilters,
   ApiListCharacters,
 } from '@app/characters/swagger/characters.swagger.js';
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Characters')
+@ApiCharactersController()
 @Controller('characters')
 export class CharactersController {
   constructor(private readonly charactersService: CharactersService) {}
