@@ -1,0 +1,17 @@
+export enum ErrorCode {
+  BadRequest = 'BAD_REQUEST',
+  ValidationError = 'VALIDATION_ERROR',
+  Unauthorized = 'UNAUTHORIZED',
+  Forbidden = 'FORBIDDEN',
+  NotFound = 'NOT_FOUND',
+  Conflict = 'CONFLICT',
+  UnprocessableEntity = 'UNPROCESSABLE_ENTITY',
+  TooManyRequests = 'TOO_MANY_REQUESTS',
+  InternalError = 'INTERNAL_ERROR',
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE',
+  InvalidCredentials = 'INVALID_CREDENTIALS',
+  EmailTaken = 'EMAIL_TAKEN',
+  SquadFull = 'SQUAD_FULL',
+  CharacterAlreadyInSquad = 'CHARACTER_ALREADY_IN_SQUAD',
+  CharacterNotFound = 'CHARACTER_NOT_FOUND',
+}
