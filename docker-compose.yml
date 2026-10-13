@@ -8,24 +8,40 @@ services:
       POSTGRES_PASSWORD: squad
       POSTGRES_DB: squad_of_champions
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U squad -d squad_of_champions']
+      test: ["CMD-SHELL", "pg_isready -U squad -d squad_of_champions"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    command: ['redis-server', '--appendonly', 'yes']
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: squad
+      MONGO_INITDB_ROOT_PASSWORD: squad
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -39,19 +55,26 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://squad:squad@postgres:5432/squad_of_champions?schema=public
       REDIS_URL: redis://redis:6379
-      LOG_PRETTY: 'false'
+      MONGO_URL: mongodb://squad:squad@mongo:27017/squad_of_champions?authSource=admin
+      LOG_PRETTY: "false"
       CHARACTERS_JSON_PATH: /app/data/characters.json
     volumes:
       - ./frontend/src/data/characters.json:/app/data/characters.json:ro
     ports:
-      - '3000:3000'
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mongo:
+        condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/api/v1/health > /dev/null || exit 1']
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/v1/health > /dev/null || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,17 +87,21 @@ services:
       args:
         VITE_API_URL: http://localhost:3000/api/v1
     environment:
-      NGINX_ENTRYPOINT_QUIET_LOGS: '1'
+      NGINX_ENTRYPOINT_QUIET_LOGS: "1"
       PUBLIC_APP_URL: http://localhost:8080
       PUBLIC_API_URL: http://localhost:3000/api/v1
       PUBLIC_SWAGGER_URL: http://localhost:3000/api/docs
     ports:
-      - '8080:8080'
+      - "8080:8080"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8080/healthz > /dev/null || exit 1']
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:8080/healthz > /dev/null || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -83,3 +110,4 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  mongo-data:

@@ -1,0 +1,10 @@
+export const ACTIVITY_COLLECTION = 'activity_events';
+export const DEFAULT_HISTORY_PAGE_SIZE = 20;
+export const MAX_HISTORY_PAGE_SIZE = 50;
+export const DEFAULT_PICK_STATS_DAYS = 7;
+export const MAX_PICK_STATS_DAYS = 90;
+export const PICK_STATS_LIMIT = 10;
+export const PICK_STATS_CACHE_KEY_PREFIX = 'stats:picks';
+export const PICK_STATS_CACHE_TTL_SECONDS = 60;
+export const DAY_IN_MS = 24 * 60 * 60 * 1000;
+export const INVALID_HISTORY_CURSOR_MESSAGE = 'The cursor is invalid';

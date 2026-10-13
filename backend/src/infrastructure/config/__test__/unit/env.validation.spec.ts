@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const requiredEnv = {
   DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+  MONGO_URL: 'mongodb://localhost:27017/db',
   REDIS_URL: 'redis://localhost:6379',
   JWT_ACCESS_SECRET: 'test-only-secret-that-is-at-least-32-characters',
 };

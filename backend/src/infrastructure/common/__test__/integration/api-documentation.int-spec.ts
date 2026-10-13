@@ -55,6 +55,8 @@ describe('API documentation', () => {
       'GET /api/v1/popularity',
       'GET /api/v1/squads',
       'GET /api/v1/squads/{id}',
+      'GET /api/v1/squads/{id}/history',
+      'GET /api/v1/stats/picks',
       'PATCH /api/v1/squads/{id}',
       'POST /api/v1/auth/login',
       'POST /api/v1/auth/logout',

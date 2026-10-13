@@ -58,6 +58,12 @@ export class SquadsService {
     return toSquadResponse(row, characters, computeSquadStats(characters, filters.abilities));
   }
 
+  async assertOwned(id: string, userId: string): Promise<void> {
+    if (!(await this.squadsRepository.existsOwned(id, userId))) {
+      throw squadNotFoundError();
+    }
+  }
+
   async create(userId: string, dto: CreateSquadDto): Promise<SquadResponseDto> {
     const characterIds = dto.characterIds ?? [];
 
@@ -71,7 +77,12 @@ export class SquadsService {
       throw toSquadNameConflictError(error);
     }
 
-    this.emitSquadEvent(SquadEvent.Created, { squadId: id, userId, occurredAt: new Date() });
+    this.emitSquadEvent(SquadEvent.Created, {
+      squadId: id,
+      userId,
+      occurredAt: new Date(),
+      details: { name: dto.name, characterIds },
+    });
 
     return this.getById(id, userId);
   }
@@ -96,7 +107,12 @@ export class SquadsService {
       throw squadNotFoundError();
     }
 
-    this.emitSquadEvent(SquadEvent.Updated, { squadId: id, userId, occurredAt: new Date() });
+    this.emitSquadEvent(SquadEvent.Updated, {
+      squadId: id,
+      userId,
+      occurredAt: new Date(),
+      details: { name: dto.name, characterIds: dto.characterIds },
+    });
 
     return this.getById(id, userId);
   }

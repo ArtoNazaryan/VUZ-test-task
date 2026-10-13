@@ -33,6 +33,10 @@ export class SquadsRepository {
     });
   }
 
+  async existsOwned(id: string, userId: string): Promise<boolean> {
+    return (await this.prismaService.squad.count({ where: { id, userId } })) > 0;
+  }
+
   async create(userId: string, name: string, characterIds: number[]): Promise<string> {
     const addedAt = Date.now();
     const squad = await this.prismaService.squad.create({

@@ -1,3 +1,4 @@
+import { ActivityModule } from '@app/activity/activity.module.js';
 import { AuthModule } from '@app/auth/auth.module.js';
 import { CharactersModule } from '@app/characters/characters.module.js';
 import { HealthModule } from '@app/health/health.module.js';
@@ -7,6 +8,7 @@ import { SquadsModule } from '@app/squads/squads.module.js';
 import { CacheModule } from '@infrastructure/cache/cache.module.js';
 import { validateEnv } from '@infrastructure/config/env.validation.js';
 import { LoggerModule } from '@infrastructure/logger/logger.module.js';
+import { MongoModule } from '@infrastructure/mongo/mongo.module.js';
 import { RateLimitModule } from '@infrastructure/rate-limit/rate-limit.module.js';
 import { PrismaModule } from '@infrastructure/prisma/prisma.module.js';
 import { RedisModule } from '@infrastructure/redis/redis.module.js';
@@ -21,6 +23,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     EventEmitterModule.forRoot(),
     PrismaModule,
     RedisModule,
+    MongoModule,
     CacheModule,
     RateLimitModule,
     HealthModule,
@@ -29,6 +32,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SquadsModule,
     RealtimeModule,
     PopularityModule,
+    ActivityModule,
   ],
 })
 export class AppModule {}

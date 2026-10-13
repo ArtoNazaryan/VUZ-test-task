@@ -39,6 +39,7 @@ describe('SquadsService', () => {
   const repository = {
     findAllByUser: vi.fn<(userId: string) => Promise<TSquadSummaryRow[]>>(),
     findOwned: vi.fn<(id: string, userId: string) => Promise<TSquadDetailRow | null>>(),
+    existsOwned: vi.fn<(id: string, userId: string) => Promise<boolean>>(),
     create: vi.fn<(userId: string, name: string, characterIds: number[]) => Promise<string>>(),
     updateOwned:
       vi.fn<(id: string, userId: string, changes: ISquadMemberChanges) => Promise<boolean>>(),
@@ -109,6 +110,20 @@ describe('SquadsService', () => {
     });
   });
 
+  describe('assertOwned', () => {
+    it('passes when the squad belongs to the user', async () => {
+      repository.existsOwned.mockResolvedValue(true);
+
+      await expect(service.assertOwned('squad-1', 'user-1')).resolves.toBeUndefined();
+    });
+
+    it('throws NOT_FOUND when the squad does not belong to the user', async () => {
+      repository.existsOwned.mockResolvedValue(false);
+
+      await expect(service.assertOwned('squad-1', 'someone-else')).rejects.toMatchObject(notFound);
+    });
+  });
+
   describe('create', () => {
     it('creates the squad with the given characters in order', async () => {
       repository.create.mockResolvedValue('squad-1');
@@ -117,6 +132,10 @@ describe('SquadsService', () => {
       await service.create('user-1', { name: 'Earthrealm', characterIds: [25, 1] });
 
       expect(repository.create).toHaveBeenCalledWith('user-1', 'Earthrealm', [25, 1]);
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        SquadEvent.Created,
+        expect.objectContaining({ details: { name: 'Earthrealm', characterIds: [25, 1] } }),
+      );
     });
 
     it('creates an empty squad when no characters are given', async () => {
@@ -174,6 +193,10 @@ describe('SquadsService', () => {
         name: 'Outworld',
         characterIds: [3],
       });
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        SquadEvent.Updated,
+        expect.objectContaining({ details: { name: 'Outworld', characterIds: [3] } }),
+      );
     });
 
     it('does not check characters when only the name changes', async () => {
