@@ -5,3 +5,5 @@ import type { z } from 'zod';
 export type TSquadNameValues = z.infer<typeof squadNameSchema>;
 
 export type TSubmitSquadName = (name: string) => Promise<IApiError | null>;
+
+export type TOpenDialog = 'create' | 'rename' | 'delete' | null;

@@ -457,7 +457,7 @@ npm run dev          # http://localhost:5173
 - **Pick statistics** count only "add character" actions. Characters included when creating a squad, or replaced in bulk with PATCH, are not counted (the UI always adds one at a time). Storing one event per added character for those cases would fix it.
 - **Mongoose builds the indexes on startup** (`autoIndex`). In production I would create them in a migration step instead.
 - **History of deleted squads** is kept in MongoDB but has no endpoint, because the history route checks ownership through PostgreSQL. An audit endpoint per user would expose it.
-- **Frontend bundle**: one chunk of about 500 kB. Lazy-loading the login and register pages and splitting vendor chunks would reduce the first load.
+- **Frontend bundle**: one JavaScript chunk of about 900 kB (285 kB gzipped). Lazy-loading the login and register pages and splitting vendor chunks would reduce the first load.
 - **Rate limiting by IP**: behind a load balancer, Express `trust proxy` must be configured so the real client IP is used.
 - **Access token in memory** means one refresh call per page load. That is deliberate (safer than localStorage), at the cost of one small request.
 - Also, with more time: a live demo deployment, Playwright end-to-end tests of the main UI flows, request metrics (Prometheus) and tracing, and an audit view of a user's full activity.

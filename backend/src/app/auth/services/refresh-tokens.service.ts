@@ -1,7 +1,5 @@
-import {
-  INVALID_REFRESH_TOKEN_MESSAGE,
-  REFRESH_TOKEN_REUSE_GRACE_MS,
-} from '@app/auth/constants/auth.constants.js';
+import { REFRESH_TOKEN_REUSE_GRACE_MS } from '@app/auth/constants/auth.constants.js';
+import { invalidRefreshTokenError } from '@app/auth/helpers/auth-errors.helper.js';
 import { RefreshTokenState } from '@app/auth/enums/refresh-token-state.enum.js';
 import {
   generateRefreshToken,
@@ -14,10 +12,8 @@ import type {
   IRotatedRefreshToken,
 } from '@app/auth/interfaces/auth.interfaces.js';
 import { RefreshTokensRepository } from '@app/auth/repositories/refresh-tokens.repository.js';
-import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
-import { AppException } from '@infrastructure/common/helpers/app.exception.js';
 import type { TEnv } from '@infrastructure/common/types/env.types.js';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -56,11 +52,11 @@ export class RefreshTokensService {
     }
 
     if (state !== RefreshTokenState.Active || !row) {
-      throw this.invalidToken();
+      throw invalidRefreshTokenError();
     }
 
     if (!(await this.refreshTokensRepository.revokeIfActive(row.id, now))) {
-      throw this.invalidToken();
+      throw invalidRefreshTokenError();
     }
 
     return { userId: row.userId, refreshToken: await this.issue(row.userId) };
@@ -68,13 +64,5 @@ export class RefreshTokensService {
 
   async revoke(token: string): Promise<void> {
     await this.refreshTokensRepository.revokeByHash(hashRefreshToken(token), new Date());
-  }
-
-  private invalidToken(): AppException {
-    return new AppException(
-      ErrorCode.Unauthorized,
-      INVALID_REFRESH_TOKEN_MESSAGE,
-      HttpStatus.UNAUTHORIZED,
-    );
   }
 }

@@ -6,6 +6,7 @@ import {
   useRenameSquadMutation,
 } from '@/entities/squad/index.ts';
 import type { ISquadPickerProps } from '@/features/squad-picker/model/squad-picker.interfaces.ts';
+import type { TOpenDialog } from '@/features/squad-picker/model/squad-picker.types.ts';
 import { useActiveSquadBootstrap } from '@/features/squad-picker/model/useActiveSquadBootstrap.ts';
 import { DeleteSquadDialog } from '@/features/squad-picker/ui/DeleteSquadDialog.tsx';
 import { SquadNameDialog } from '@/features/squad-picker/ui/SquadNameDialog.tsx';
@@ -25,8 +26,6 @@ import {
 } from '@mui/material';
 import { type ReactElement, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-type TOpenDialog = 'create' | 'rename' | 'delete' | null;
 
 export function SquadPicker({ actions }: ISquadPickerProps): ReactElement {
   const dispatch = useDispatch();

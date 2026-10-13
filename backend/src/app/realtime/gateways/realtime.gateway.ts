@@ -1,13 +1,9 @@
 import { isAccessTokenPayload } from '@app/auth/helpers/token.helper.js';
 import { SOCKET_UNAUTHORIZED_MESSAGE } from '@app/realtime/constants/realtime.constants.js';
 import { buildUserRoom, readHandshakeToken } from '@app/realtime/helpers/realtime.helper.js';
-import type { ISocketData } from '@app/realtime/interfaces/realtime.interfaces.js';
+import type { TRealtimeServer, TRealtimeSocket } from '@app/realtime/types/realtime.types.js';
 import { JwtService } from '@nestjs/jwt';
 import { type OnGatewayInit, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import type { DefaultEventsMap, Server, Socket } from 'socket.io';
-
-type TRealtimeServer = Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, ISocketData>;
-type TRealtimeSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, ISocketData>;
 
 @WebSocketGateway()
 export class RealtimeGateway implements OnGatewayInit<TRealtimeServer> {

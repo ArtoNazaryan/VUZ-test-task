@@ -1,6 +1,6 @@
 import { selectCurrentUser } from '@/entities/session/index.ts';
 import { LogoutButton } from '@/features/logout/index.ts';
-import logoUrl from '@/shared/assets/images/Mortal-Kombat-Logo.png';
+import logoUrl from '@/shared/assets/images/mortal-kombat-logo.webp';
 import { Box, Stack, Typography } from '@mui/material';
 import type { ReactElement } from 'react';
 import { useSelector } from 'react-redux';

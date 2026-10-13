@@ -1,12 +1,10 @@
-import { AUTHENTICATION_REQUIRED_MESSAGE } from '@app/auth/constants/auth.constants.js';
+import { authenticationRequiredError } from '@app/auth/helpers/auth-errors.helper.js';
 import { extractBearerToken, isAccessTokenPayload } from '@app/auth/helpers/token.helper.js';
 import type {
   IAccessTokenPayload,
   IAuthenticatedRequest,
 } from '@app/auth/interfaces/auth.interfaces.js';
-import { ErrorCode } from '@infrastructure/common/enums/error-code.enum.js';
-import { AppException } from '@infrastructure/common/helpers/app.exception.js';
-import { type CanActivate, type ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -18,7 +16,7 @@ export class JwtAuthGuard implements CanActivate {
     const token = extractBearerToken(request.headers.authorization);
 
     if (!token) {
-      throw this.unauthorized();
+      throw authenticationRequiredError();
     }
 
     const payload = await this.verifyToken(token);
@@ -34,21 +32,13 @@ export class JwtAuthGuard implements CanActivate {
     try {
       payload = await this.jwtService.verifyAsync(token);
     } catch {
-      throw this.unauthorized();
+      throw authenticationRequiredError();
     }
 
     if (!isAccessTokenPayload(payload)) {
-      throw this.unauthorized();
+      throw authenticationRequiredError();
     }
 
     return payload;
-  }
-
-  private unauthorized(): AppException {
-    return new AppException(
-      ErrorCode.Unauthorized,
-      AUTHENTICATION_REQUIRED_MESSAGE,
-      HttpStatus.UNAUTHORIZED,
-    );
   }
 }
