@@ -7,6 +7,7 @@ import type {
   ISquadMemberRequest,
   ISquadSummary,
 } from '@/entities/squad/model/squad.interfaces.ts';
+import type { ISquadHistoryPage } from '@/entities/squad/model/squad-activity.interfaces.ts';
 import { baseApi } from '@/shared/api/index.ts';
 
 export const squadApi = baseApi.injectEndpoints({
@@ -18,6 +19,17 @@ export const squadApi = baseApi.injectEndpoints({
     getSquad: build.query<ISquad, string>({
       query: (id) => `/squads/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Squad', id }],
+    }),
+    getSquadHistory: build.infiniteQuery<ISquadHistoryPage, string, string>({
+      infiniteQueryOptions: {
+        initialPageParam: '',
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+      query: ({ queryArg, pageParam }) => ({
+        url: `/squads/${queryArg}/history`,
+        params: pageParam ? { cursor: pageParam } : undefined,
+      }),
+      providesTags: (_result, _error, id) => [{ type: 'SquadHistory', id }],
     }),
     createSquad: build.mutation<ISquad, ICreateSquadRequest>({
       query: (body) => ({ url: '/squads', method: 'POST', body }),
@@ -132,6 +144,7 @@ export const squadApi = baseApi.injectEndpoints({
 export const {
   useGetSquadsQuery,
   useGetSquadQuery,
+  useGetSquadHistoryInfiniteQuery,
   useCreateSquadMutation,
   useRenameSquadMutation,
   useAddSquadMemberMutation,

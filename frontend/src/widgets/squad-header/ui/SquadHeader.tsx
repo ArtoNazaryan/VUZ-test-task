@@ -5,6 +5,7 @@ import {
   SquadStats,
   useGetSquadQuery,
 } from '@/entities/squad/index.ts';
+import { SquadHistoryButton } from '@/features/squad-history/index.ts';
 import { SquadPicker } from '@/features/squad-picker/index.ts';
 import { useRemoveSquadMember } from '@/features/toggle-squad-member/index.ts';
 import { Stack, Typography } from '@mui/material';
@@ -27,7 +28,9 @@ export function SquadHeader(): ReactElement {
       <Typography variant="h1" align="center">
         {characters.length > 0 ? 'Your champions!' : 'Select your squad to defend earthrealm'}
       </Typography>
-      <SquadPicker />
+      <SquadPicker
+        actions={activeSquadId ? <SquadHistoryButton squadId={activeSquadId} /> : undefined}
+      />
       {characters.length > 0 && (
         <Stack
           direction="row"

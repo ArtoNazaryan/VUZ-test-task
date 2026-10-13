@@ -17,6 +17,12 @@ export function refetchChangedSquad(
   message: ISquadChangedMessage,
 ): ReturnType<typeof squadApi.util.invalidateTags> {
   return squadApi.util.invalidateTags(
-    message.change === 'deleted' ? ['Squads'] : ['Squads', { type: 'Squad', id: message.squadId }],
+    message.change === 'deleted'
+      ? ['Squads']
+      : [
+          'Squads',
+          { type: 'Squad', id: message.squadId },
+          { type: 'SquadHistory', id: message.squadId },
+        ],
   );
 }
