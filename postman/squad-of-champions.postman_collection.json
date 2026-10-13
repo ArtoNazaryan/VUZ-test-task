@@ -1,0 +1,830 @@
+{
+  "info": {
+    "name": "Squad of Champions API",
+    "description": "REST API of the Squad of Champions challenge.\n\n1. Import this collection and the \"Squad of Champions - local\" environment, then select the environment.\n2. Run **Auth > Register** once (or **Login** if the account exists). The access token is saved automatically and sent as a Bearer token by every request that needs it.\n3. The refresh token is an httpOnly cookie; Postman keeps it in its cookie jar, so **Auth > Refresh access token** works without copying anything.\n4. **Squads > Create squad** saves the new squad id, so the other squad requests work right after it.\n\nSwagger UI with every schema: http://localhost:3000/api/docs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "squadId",
+      "value": ""
+    },
+    {
+      "key": "characterId",
+      "value": "25"
+    },
+    {
+      "key": "nextCursor",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Reports whether PostgreSQL and Redis are reachable. 503 when one of them is down.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Creates an account and logs in. Returns 409 EMAIL_TAKEN if the account already exists; use Login then.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 201 or 409', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('returns an access token', () => {",
+                  "    pm.expect(body.accessToken).to.be.a('string');",
+                  "  });",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Returns a 15 minute access token and sets the refresh token cookie. Wrong credentials return 401 INVALID_CREDENTIALS.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('returns an access token', () => {",
+                  "  pm.expect(body.accessToken).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('accessToken', body.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "The logged in user. Needs the access token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh access token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Uses the refresh token cookie to get a new access token. The refresh token is rotated on every call; reusing an old one revokes the whole session.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('returns an access token', () => {",
+                  "  pm.expect(body.accessToken).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('accessToken', body.accessToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Characters",
+      "item": [
+        {
+          "name": "List characters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/characters?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["characters"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Page size, 1 to 50"
+                }
+              ]
+            },
+            "description": "Cursor paginated, sorted by name. Saves nextCursor and the first character id for the requests below.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('nextCursor', body.nextCursor ?? '');",
+                  "if (body.items.length > 0) {",
+                  "  pm.collectionVariables.set('characterId', String(body.items[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List characters (next page)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/characters?limit=20&cursor={{nextCursor}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["characters"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Page size, 1 to 50"
+                },
+                {
+                  "key": "cursor",
+                  "value": "{{nextCursor}}",
+                  "description": "nextCursor from the previous page"
+                }
+              ]
+            },
+            "description": "Run \"List characters\" first; this continues from its nextCursor.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('nextCursor', body.nextCursor ?? '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search and filter characters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/characters?search=sub&tags=ninja,robot&universes=Mortal Kombat&sort=-name",
+              "host": ["{{baseUrl}}"],
+              "path": ["characters"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "sub",
+                  "description": "Name or tag contains this text"
+                },
+                {
+                  "key": "tags",
+                  "value": "ninja,robot",
+                  "description": "Comma separated tag names",
+                  "disabled": true
+                },
+                {
+                  "key": "universes",
+                  "value": "Mortal Kombat",
+                  "description": "Comma separated universe names",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "-name",
+                  "description": "name (default) or -name",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "search matches the name or any tag. tags and universes are comma separated and match any of the values. sort is name or -name.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get filter options",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/characters/filters",
+              "host": ["{{baseUrl}}"],
+              "path": ["characters", "filters"]
+            },
+            "description": "All universes, tags and ability names, for building filters.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get character",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/characters/{{characterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["characters", "{{characterId}}"]
+            },
+            "description": "One character with tags and abilities. Unknown ids return 404.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Squads",
+      "item": [
+        {
+          "name": "Create squad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/squads",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads"]
+            },
+            "description": "Creates a squad, optionally with up to 6 characters. Saves the new squad id. Names are unique per user (409 SQUAD_NAME_TAKEN).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman squad {{$timestamp}}\",\n  \"characterIds\": [\n    1,\n    25,\n    42\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 201', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('squadId', body.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List my squads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads"]
+            },
+            "description": "Your squads with their member counts."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get squad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}"]
+            },
+            "description": "Characters and the average of each ability. Squads of other users return 404."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add character",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}/characters/{{characterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}", "characters", "{{characterId}}"]
+            },
+            "description": "Adds one character. 409 CHARACTER_ALREADY_IN_SQUAD if it is already there, 422 SQUAD_FULL at 6 characters. Safe under concurrent requests."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove character",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}/characters/{{characterId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}", "characters", "{{characterId}}"]
+            },
+            "description": "Removes one character. Removing a character that is not in the squad is not an error."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rename squad",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}"]
+            },
+            "description": "Changes only the name.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Renamed {{$timestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Replace characters",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}"]
+            },
+            "description": "Replaces all characters; send [] to empty the squad. Omit characterIds to keep them.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"characterIds\": [\n    7,\n    12\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Squad history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}/history?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Page size, 1 to 50"
+                }
+              ]
+            },
+            "description": "Timeline of the squad from the MongoDB activity log, newest first, with cursor paging."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete squad",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/squads/{{squadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["squads", "{{squadId}}"]
+            },
+            "description": "Deletes the squad and its members."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 204', () => {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Popularity and stats",
+      "item": [
+        {
+          "name": "Most picked right now",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/popularity",
+              "host": ["{{baseUrl}}"],
+              "path": ["popularity"]
+            },
+            "description": "How many squads currently contain each character, top 10. Also pushed live over WebSocket as popularity:updated.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Most added in the last N days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/picks?days=7",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "picks"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "1 to 90"
+                }
+              ]
+            },
+            "description": "MongoDB aggregation over the activity log: how often each character was added to a squad in the window, top 10.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 200', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "item": [
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Revokes the refresh token and clears its cookie. Run Login again afterwards.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responds with 204', () => {",
+                  "  pm.response.to.have.status(204);",
+                  "});",
+                  "pm.collectionVariables.set('accessToken', '');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
